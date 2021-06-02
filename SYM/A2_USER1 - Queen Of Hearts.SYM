@@ -1,0 +1,229 @@
+; Queen of Hearts
+;
+; AppleWin will auto-load this file
+;
+; name it as A2_USER1.SYM
+; 
+
+; to avoid confusion when tracing,
+; 
+; rename A2_BASIC.SYM to A2_BASIC.SYM.stop
+
+
+;
+; After adding more symbol, reload (case doesn't matter):
+;
+; SYMUSER clear
+; SYMUSER load
+;
+
+; when tracing, use F11 to save state, F12 to re-load state
+
+
+;
+; below are name for tracing Wayout
+;
+
+
+; normal trace, f7 15 times for a loop for 
+;
+
+; right "white lazer"
+; bload "lazer.bin", 7300
+; bsave... 7300,74ff
+
+; Start: 2DFD
+; End: 9000
+
+
+00 z00
+01 z01
+02 z02
+03 z03
+04 z04
+05 z05
+06 z06
+07 z07
+08 z08
+9 z09
+A z0A
+B z0B
+C z0C
+D Z0D
+E Z0E
+F z0F
+10 z10
+11 z11
+12 z12
+13 z13
+14 z14
+15 z15
+16 z16
+17 z17
+
+18 z18
+19 z19
+1a z1a
+1b z1b
+1c z1c
+1d z1d
+1e z1e
+1F z1f
+20 z20
+
+26 z26
+27 z27
+
+
+
+;readPDL1
+; 
+; up,central,down: 
+
+
+
+; decLife
+; decrease Life here *CHEAT* change CE DEC to 2C
+
+;---------------
+;
+;
+;---------------
+;---------------
+;1200 YtabL
+;1300 YtabH
+
+81a ballX
+81e ballY
+
+818 oldBX
+81c oldBY
+
+;9e8 check oldBY ?
+;
+
+cb5 ox1
+cb7 ox_a
+cbd ox_b
+
+
+cbf ox2
+cbb ox3
+
+cb6 oY1
+cc0 oY2
+cbc oY3
+;--------
+cb8 Y1
+cbe Y2
+
+
+;8b5... 924Wait.. 928 jmp 8b5
+
+
+;b19 add ballX (81b as fractional part..)
+
+;c24 update ballY?
+
+
+; 818/81c erase??
+;
+;
+;
+;5007=81a-3 (1d)
+;5008=81e-3 (35)
+;5009=0 ?
+
+; 4879 JMP (4824)
+
+;4800 NOP
+;4801 4c 41 48
+;
+;4841...
+;4860 ?fail?
+
+;4824
+;4832 
+; 2 callers to 4AFA
+;
+4AFA missBall
+; miss the ball and make sound
+
+; 4879 JMP (4824)
+
+
+; 48a4
+;4933
+;496e
+;4a35 (after top left piece low pitch beep)
+;4a95 (after piece under triangle, and right)
+;4afa missing?
+;4c1c after miss beeping..
+;4cb5 hit top right rolling? even lower pitch beep
+;4d39 after mid beep
+;4d9d wait for right button to launch ball?
+
+;5000 (called by a6a
+;500c?
+;5027 jsr 50db to erase ball 
+;
+
+;7912 get key, button0/1 
+
+;cmp #$c0
+;bcs xx
+; search c9 c0 b0
+
+
+;baf:   jmp PATCH // original codel STA BallY 8d 1e 08
+;bb2:   jmp   c32
+; <A> got BallY now
+;Patch:   cmp #$ xx
+;         blt OK  // bcc, hex 90 XX
+;
+;------
+; need to patch the data
+;
+;         lda #$0   // a9 0
+;         sta 97e   // 8d 7e 09
+;         lda #$xx  // a comfort Y val
+;
+; OK      sta BallY
+;b900:c9 xx
+;90
+;a9 xx
+;8d 7e 9
+;a9 xx
+
+;a9 xx
+
+;8d 1e 8
+;4c b2 b
+
+
+;// or 
+
+;
+;baf: jmp Patch
+;caf: jmp Patch
+
+;Patch:   cmp #$ xx
+;         bcs fix   // bcc, hex b0 06
+;         sta bally // 8d 1e 08
+;         jmp c32   // 4c 32 0c
+;------
+;
+; need to patch the data
+; fix:
+;         lda #$0   // a9 0
+;         sta 97e   // 8d 7e 09
+;         lda #$xx  // a comfort Y val
+;
+; OK      sta BallY
+;         lda xx
+;         sta 81a   // ballX
+
+cbf ox2
+cc0 oy2
+
+// 818 (oldBX// oldBY 81C)

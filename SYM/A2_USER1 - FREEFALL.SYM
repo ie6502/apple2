@@ -1,0 +1,351 @@
+;
+; AppleWin will auto-load this file
+;
+; name it as A2_USER1.SYM
+; 
+
+; to avoid confusion when tracing,
+; 
+; rename A2_BASIC.SYM to A2_BASIC.SYM.stop
+;FREE FALL SIRIUS
+
+
+;
+; After adding more symbol, reload (case doesn't matter):
+;
+; SYMUSER clear
+; SYMUSER load
+;
+
+; when tracing, use F11 to save state, F12 to re-load state
+
+
+;
+; below are name for tracing Wayout
+;
+
+
+; normal trace, f7 15 times for a loop for 
+;
+
+; right "white lazer"
+; bload "lazer.bin", 7300
+; bsave... 7300,74ff
+
+; Start: 2DFD
+; End: 9000
+
+;FREE FALL SIRIUS
+
+;60F2:a9 3 , STA 1532 (LIFE)
+
+;E19:2C (INF. LIFE) was DEC LIFE (CE 32 15)
+
+;9AD? draw death player?
+
+
+00 z00
+01 z01
+02 z02
+03 z03
+04 z04
+05 zX_
+06 zX_END_
+07 zY
+08 zY_END
+9 zDRAWPAGE
+;
+; 0 PAGE1, 20:PAGE2
+;
+A zXREG
+B z0B
+; B,C,E,10
+; eg. 8c, 1b , 1,a8
+C zPlayerX_
+;
+D zPlayerY
+E Z0E
+;
+F z0F
+10 z10
+;
+11 z11
+12 z12
+13 z13
+14 z14
+15 z15
+16 eraS1BombX_
+17 eraS1BombY
+
+18 z18
+19 z19
+1a z1a
+1b z1b
+1c z1c
+1d z1d
+1e z1e
+1F z1f
+20 z20
+
+26 z26
+27 z27
+
+56 ballYHit1
+57 ballYhit_sub5
+58 ballHit00
+59 ballHit80
+5a ballHit5a
+
+5F BALL_X_DIV7
+60 BALL_Y
+
+61 z61
+62 z62
+63 zBallVY
+;0 means up, 1 means down
+
+65 OLD_BALL_X_DIV7
+64 OLD_BALL_Y
+
+66 OldB_X_p2
+67 OldB_Y_p2
+
+68 z_test50
+
+D6 isCupAround
+D7 EraCupX_
+D8 EraCupY
+;readPDL1
+; 
+; up,central,down: 
+
+
+
+; decLife
+; decrease Life here *CHEAT* change CE DEC to 2C
+
+;---------------
+;
+;
+;---------------
+;---------------
+
+
+8c6 S1_But0_8c6
+
+96c S1doEraseCup
+98d S1doEraseBomb
+
+B11 S3_updBar
+D4D UPT_PLY
+; check ctrl, draw new player 
+
+DAE ERASE_HAT
+; conditional erase above player, after new one is drawn, it will skip if not falling down
+;
+
+DD3 STOP_CTRL
+; stop getting player moving once playerY fall down to #$A0
+
+
+
+
+FEE BLT_bar
+
+1020 eraS1_obj
+; can be Stage 1 Cup or Bomb
+
+1454 But0_INITIAL
+
+1774 updBomb
+; Stage 1 and 3
+
+;7CD2
+1677 S1_bars_1
+
+189E BLTLowRightNum
+; draw the number of at lower RIGHT
+;
+
+1869 S1869
+1884 s1884
+18D1 isBallHitBomb
+1A64 chkPY
+;
+; check player X on not on right most, then check Y
+
+1BDE updBall
+;
+; update ball position, and also check corner of Ball to see if non-zero.. 
+;
+1532 LIFE
+
+
+60F2 INIT_LIFE
+
+6140 getPDL0
+61dc peekSpkr
+61e0 sndBallHitBomb
+
+6261 sndPickedCup
+62C1 CtrlKey
+;
+; check ESC, Ctrl-S..etc
+
+62AF NoiseBallHit
+; 61bb<-20 (test was 92) 61bf<-1e (test was 0) 61c1<-2  (test was ff)
+
+654E But0
+
+66C9 updBullet
+677B S3_3
+67D1 S3_updGunBullet
+;
+691F updBAR
+;
+; 3 bars on the score to redraw to new position
+; lengthy code to get draw pattern to 1002,1003 before drawing
+;
+
+
+6A9F S2_BUT0_CHK
+; 6AEC SET LDA TO 1A64
+
+6AFF ERA_swordHandle
+;
+; the move up sword
+;  
+
+6b2c doEraUFO
+
+6B4E S2_Page2
+; Stage 2 flip to Page 1, and update Page 2 object 
+
+6bbd TstBallY1
+6bfc exit_tstBY1
+6bfd EraUFO
+; stage 2 UFO shape dishes
+
+6C20 p2ERAufo
+;
+
+
+6C43 updUFO
+; update and draw UFO
+
+6E53 nUFOX_
+6E5F nUFOY
+
+6e77 UFO_X_
+; X DIV 7
+6E7D UFO_Y
+
+
+6E83 p2_UFOX_ERA
+6E89 p2_UFOY_ERA
+
+6E90 barX_S
+6E93 barX_END
+6E96 barY
+6E99 barP
+
+6EA3 GunY
+6ED4 HangerY
+
+6ED8 GunX_
+6EDC Gun_y2
+
+6EDD bulletParm
+6EDF bulletP2
+6EE0 GUNdir
+6EE4 GunVY2
+
+6EEC gunPat1_L
+6EED gunPat1_H
+; A463:D5 pattern
+
+6EEE gunPat2_L
+6EEF gunPat2_H
+;A465:AA pattern
+
+6EF0 bulletX_
+6EF1 bullet_F1
+6EF4 bulletY
+6EF5 bullet_F5
+6FF6 CALL_S1
+
+7009 ERASE_BALL
+
+
+;---------------
+7539 YtabH
+7601 YtabL
+;---------------
+
+77A6 flgSkipEraHAT
+77A7 updHanger
+;
+; move up with auto erase hanger, with the shape bottom with zeros to erase old hanger
+;
+; also check with touching player Y on a few Y, stop getPDL0 as need
+;
+;
+
+7A61 BITBLT
+; e.g draw player
+
+7A99 S1_EraExplosion
+7AC5 ERASE_B2
+
+7AE9 BLT2
+; draw UFO,
+;
+
+7B47 ERASE_BLT
+; ERASE TOP LINE OF HAND AFTER PRESSED DROP DOWN 1ST TIME
+
+
+7b8b swordX_div_7
+7B8C swordY
+7B8D updSword
+
+7CD2 uptCup
+; Stage 1 and 3
+
+7D5A CupTouched
+
+7DC4 cupFlg2
+;
+; INC 61BD if under 9, set 0 to 7DC4 (was 1)
+
+;
+; sub 1 for the Sword, can be negative number ($Fx range)
+;
+; don't draw unless Y is 11 to BC
+; also check if player collide with it, goto 7C57 if OK
+; 
+; else
+;  1965<-$FF 
+;  getPDL0 <- 60 (skip control)
+;  NOP the erase hat, need to ERASE instead of RTS
+;  z5C<- EA ??
+;  BE<-0
+
+
+; All place to store getPDL0 (6140)
+; 
+; 830
+; 8E2
+; DD5
+; FBA
+; 13AF
+; 1944
+; 198C
+; 1A05
+; 1A43
+; 1FBA
+; 60DD
+; 6742
+; 789D
+; 7919
+; 7C46

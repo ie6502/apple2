@@ -1,0 +1,182 @@
+;
+; RASTER BLASTER
+;
+; AppleWin will auto-load this file
+;
+; name it as A2_USER1.SYM
+; 
+
+; to avoid confusion when tracing,
+; 
+; rename A2_BASIC.SYM to A2_BASIC.SYM.stop
+
+
+;
+; After adding more symbol, reload (case doesn't matter):
+;
+; SYMUSER clear
+; SYMUSER load
+;
+
+; when tracing, use F11 to save state, F12 to re-load state
+
+
+;
+; below are name for tracing Wayout
+;
+
+
+; normal trace, f7 15 times for a loop for 
+;
+
+; right "white lazer"
+; bload "lazer.bin", 7300
+; bsave... 7300,74ff
+
+; Start: 2DFD
+; End: 9000
+
+
+00 z00
+01 z01
+02 z02
+03 z03
+04 z04
+05 z05
+06 z06
+07 z07
+08 z08
+;
+; 6 also determine ship direction, 0 forward to right
+;   37, backward to left
+;
+
+9 z09
+A z0A
+B z0B
+C z0C
+D Z0D
+E Z0E
+F z0F
+10 z10
+11 z11
+12 z12
+13 z13
+14 z14
+15 z15
+16 z16
+17 z17
+
+18 z18
+19 z19
+1a z1a
+1b z1b
+1c z1c
+1d z1d
+1e z1e
+1F z1f
+20 z20
+
+26 z26
+27 z27
+
+80 ballY
+81 ballX
+82 bitmap_offset
+83 Xpos
+84 Ypos
+
+85 Xacc
+86 Yacc
+87 Xvel
+88 Yvel
+
+
+;
+; FC also pYtabL
+; FE also pYtabH
+
+
+200 xorDraw
+
+
+
+240 YtabL
+340 YtabH
+
+;readPDL1
+; 
+; up,central,down: 
+
+
+
+; decLife
+; decrease Life here *CHEAT* change CE DEC to 2C
+
+;---------------
+;
+;
+;---------------
+
+
+104c INC_BALLX
+105c drwDownBal1
+
+114A flip0
+114d flip_1
+114e flip_2
+;---------------
+
+1158 gBtn0
+115f gBtn1
+;---------------
+
+1178 notFlip
+1179 flipped
+
+4082 scanTable1
+
+4125 Flip2
+
+42dc updB1
+
+434f bal0
+4361 cpyB_data
+
+4387 j42dc
+438a jLflip
+438d jRflip
+4390 jTopRoll
+
+439A resetYwait
+; *CHEAT* slow down fall down by changing
+; 439B from B to 5b (extremely slow)
+
+43b2 store_bal
+;---------------
+
+4497 Loop0
+449F getBtn0
+44A2 getBtn1
+44AC doBallUpt
+44b6 unknown1
+44c0 noeffect1
+44c3 doRightFlip
+44c6 doBallLock
+44c9 LoopEnd
+;---------------
+
+;--- CHEAT ball  ??
+46A0 checkBallY
+
+;---------------
+;---------------
+4c20 chkRFlip
+4c27 RFlipped
+
+
+684C doLoop0
+; after losing ball, then jsr 4003 which PLA few times
+; to return to 684F
+
+

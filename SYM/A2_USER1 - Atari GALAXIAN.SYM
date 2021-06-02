@@ -1,0 +1,102 @@
+; Atarisoft Galaxian
+;
+; infinite life 1Player
+; 1751:A5
+;
+; 1102:2c
+; 15bf:4c c9 15
+; wave 48 till 256, cannot draw wave correctly
+; warp to wave 0 with no flag
+;
+; if more than 12 life then draw life incorrectly
+; if over 42 life then corrupt to the top
+
+
+d Life
+16 wave
+11 score_L
+12 score_H
+; BCD of score always add dummy 0 on screen 
+
+30 ShipX
+
+200 AlienX
+230 AlienY
+2C0 AlienVX
+;
+401 P2score_L
+402 P2score_H
+; BCD of High score
+
+701 Hiscore_L
+702 Hiscore_H
+; BCD of High score
+
+
+9f4 restart1
+; restart game
+; clr screen, print score, etc
+; a78: store 3 at $b, store 2 at d
+; DB8..
+e9b tst1P
+; test 1 Player
+; other keys ctrl O,Q,S,R
+f05 SPACE_pressed
+;
+
+fc6 getMove
+; FE left, 02 Right store to $4, jmp 1031
+
+1015 Fire
+; pressed SPACE
+
+1031 doEraShip
+; erase player
+104E doDrawShip
+
+10DE tstX90_M
+; minus ship X by 2 and cmp $90
+10EF tstX90_P
+; test with Bullet?
+
+1102 do17e3_1
+; kill player?
+
+
+
+1156 LoadShipX_dr
+118A LoadShipX_er
+; load X to draw and erase
+
+130b bltDrop
+; draw alien dropping bullet
+
+1375 bltChar
+; draw a character on Acc, X: Xpos, Y:0 or 17 (top bottom)
+
+1515 tstX
+; test ShipX with $1e
+1538 tstX2
+; check with 200..21E..
+
+15BF do17e3_2
+
+
+1751 DEC_LIFE
+17f2 clrScr
+; clear Top and bottom line that show life and wave
+; and then clear playfield
+
+183F prtStr
+; A is the pointer to string
+1870 prtBCD
+; print 2 digit BCD
+
+18E8 DELAY
+
+1885 BEEP
+18f4 getPDL
+
+
+1e00 YTabL
+1f00 YTabH

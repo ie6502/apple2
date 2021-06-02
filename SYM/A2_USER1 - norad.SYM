@@ -1,0 +1,57 @@
+; NORAD CHEAT
+;
+; AppleWin will auto-load this file
+;
+; name it as A2_USER1.SYM
+; 
+
+
+62 GunNow
+b8 GunAliveState
+;
+
+a67 GunS1
+a7d GunS2
+
+298 isItStarDraw
+
+; F61 11A7
+; 458F
+; 558F 5F61 61A7 958F
+;
+; 107F
+;
+4422 doChk
+
+;7a array.. missile count??
+434b getKey
+
+4420 storeKey
+; key at z13, e.g. press 7 store #$37 to z13
+
+455c chkF
+;check missile
+; 455f:a9 9 ea
+; B8 GUN STATE
+; C4 BULLET ARRAY
+; AE HOMEBASE?
+
+;4589:dec $c4,x (d6/c4)
+; *CHEAT*
+;
+;4601? dec 98,x ?? (d6/98)
+
+4604 chkHome
+; see if home is damaged
+
+;
+;
+474e DamageHome
+; d6 ae dec ae,x  to b5 ae (lda ae,x)
+; *CHEAT*
+;
+
+47a3 cmpColon
+47af cmpMinus
+
+; 

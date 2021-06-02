@@ -1,0 +1,141 @@
+; Aquatron
+
+;
+; AppleWin will auto-load this file
+;
+; name it as A2_USER1.SYM
+; 
+
+; to avoid confusion when tracing,
+; 
+; rename A2_BASIC.SYM to A2_BASIC.SYM.stop
+
+
+;
+; After adding more symbol, reload (case doesn't matter):
+;
+; SYMUSER clear
+; SYMUSER load
+;
+
+; when tracing, use F11 to save state, F12 to re-load state
+
+
+;
+; below are name for tracing Wayout
+;
+
+
+; normal trace, f7 15 times for a loop for 
+;
+
+; right "white lazer"
+; bload "lazer.bin", 7300
+; bsave... 7300,74ff
+
+; Start: 2DFD
+; End: 9000
+
+
+00 z00
+01 z01
+02 z02
+03 z03
+04 z04
+05 z05
+06 z06
+07 z07
+08 z08
+9 z09
+A z0A
+B z0B
+C z0C
+D Z0D
+E Z0E
+F z0F
+10 z10
+11 z11
+12 z12
+13 z13
+14 z14
+15 z15
+16 z16
+17 z17
+
+18 z18
+19 z19
+1a z1a
+1b z1b
+1c z1c
+1d z1d
+1e z1e
+1F z1f
+20 z20
+
+26 z26
+27 z27
+
+
+
+;readPDL1
+; 
+; up,central,down: 
+
+
+
+; decLife
+; decrease Life here *CHEAT* change CE DEC to 2C
+
+;---------------
+;
+;
+;---------------
+;---------------
+;1200 YtabL
+;1300 YtabH
+
+1F6A chkBtn1
+; 1f73 ?fired button1?
+; nope cont at 1f78
+; ldx #1 stx 101e 101f, lda #1, sta 101d jmp106a 
+; 0 101d/101e if release?
+
+; later update 101f to 55f
+; 1f9a (? fired check at 55F
+; fc +=8, fb -=08
+
+;6ee0 draw button2 bullet?
+
+73c0 hitSth
+7647 hitWhat
+
+
+;---------------
+
+7696 DEC_HEALTH
+; *CHEAT* 
+;---------------
+
+; collide with something when testing
+8230 XorScannerPlayer
+; actual blt code
+8283 xoSCPly
+; called by 9160 doXorScPly
+; call XorScannerPlayer
+
+; call by 8283
+
+9013 GameLoop
+; ??
+9068 repeatLoop
+
+9154 doDrawTide
+; page2 water ti666de
+9160 doXorScPly
+9168 doDrawPly
+; draw player on page2,
+; but also update update player's backglow on page1 
+9187 doStarBG
+; draw starBG on page2
+9196 doShipTest
+; collison test?

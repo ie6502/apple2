@@ -1,0 +1,269 @@
+;
+; AppleWin will auto-load this file
+;
+; name it as A2_USER1.SYM
+; 
+
+; to avoid confusion when tracing,
+; 
+; rename A2_BASIC.SYM to A2_BASIC.SYM.stop
+
+
+;
+; After adding more symbol, reload (case doesn't matter):
+;
+; SYMUSER clear
+; SYMUSER load
+;
+
+; when tracing, use F11 to save state, F12 to re-load state
+
+
+;
+; below are name for tracing Wayout
+;
+
+
+; normal trace, f7 15 times for a loop for 
+;
+
+; right "white lazer"
+; bload "lazer.bin", 7300
+; bsave... 7300,74ff
+
+; Start: 2DFD
+; End: 9000
+
+
+00 z00
+01 z01
+02 z02
+03 z03
+04 z04
+05 z05
+06 z06
+07 z07
+08 z08
+9 z09
+A z0A
+B z0B
+C z0C
+D Z0D
+E Z0E
+F z0F
+10 tmpY
+11 z11
+12 z12
+13 z13
+14 z14
+15 z15
+16 z16
+17 z17
+
+18 z18
+19 z19
+1a z1a
+1b z1b
+1c z1c
+1d z1d
+1e z1e
+1F z1f
+20 z20
+
+26 z26
+27 z27
+
+58 lifeShadow
+306 life
+
+
+60 pacmanX
+61 pacmanY
+
+70 GhostX
+71 GhostY
+72 Ghost_2
+73 Ghost_3
+74 Ghost_4
+75 Ghost_5
+
+80 Gwait
+; if 
+
+
+
+
+; life start from 83
+
+
+;readPDL1
+; 
+; up,central,down: 
+
+
+
+; decLife
+; decrease Life here *CHEAT* change CE DEC to 2C
+
+;---------------
+;
+;
+;---------------
+; gameloop
+530F Gameloop
+
+531b goGameLoop
+
+;---------------
+
+53cf cpyParm1
+; copy value from 300 to 52, etc..
+
+556e prtPlyNm
+55a6 prtPlayerPound
+
+55cc TblLifeX
+55cd TblLifeParm2
+
+
+5659 doHGR
+5692 showStageFruit
+
+56cf prtLifes
+56fd drawPacLife
+
+5b58 getYtbl
+5c27 YtabH
+5b67 YtabL
+
+5913 putDot
+591b clrDot
+
+5925 tbl1248
+592c tblReverse1248
+
+5933 getMod7
+5a58 tdiv7X
+5958 tmod7X
+; zc ref for t, if D=0
+; else zc+4..
+; z4 = divX
+; z3 = mod x
+
+5ce7 moveRight
+; Xreg is X mod 7, Y is X div 7
+
+5cf0 Hline
+; Parameters:
+; zC is X-low, zD is X-High
+; zE is end pit 
+; z10 is Y
+;
+;5dbf table for Hlines, every 3 value as parms
+;           48 parms total
+; and then 46 parms for Vertical lines.
+5cf6 Hline2
+; another entry point 
+
+; 52.. 54 copy to z567
+; call 696a blank val
+
+5d3d Vline
+5d53 drawMaze
+
+
+6113 plotDots
+6172 normalDot
+61b6 PowerDot
+
+623A mazeData
+; from 625B, top down, e.g 112101.. means
+; dot at top, down 1 row with dot
+; then 2 is Power up dot,
+; then 1 is a dot
+; 0 skip
+; then 1 more normal dot
+;
+
+693a prtNum
+
+699e eraseGhost
+;
+
+69a1 blt_A
+69e9 prep_A
+6a20 draw_shapeFinal
+; can be ghost, death animation
+
+
+6ce8 wait0
+
+6f2f showHGR
+6F3C showTxt2
+6F46 clrHIRES
+70cc doPrtHiScore
+70f5 prtHighSC
+7159 prtPlayerNum
+
+75f1 g_1_uptz16_7
+
+7861 firstMov
+; pacman's first move?
+
+7b12 testzLife
+
+7bac toneC030
+
+7c82 doTone
+; 
+; see if minus? and check 54 to see if print Life?
+;
+
+86eA DrawGhost
+
+86fc cpyGhostParm
+; get ghost parm to zpage
+; from 84    to 70
+; from 84+13 to 70
+; from 84+27 to 70
+; from 84+3b to 70
+; from 84+4F to 70..
+; ??
+8712 cpyParm2G
+; 0070 to 84..
+; eg. 83..70 to d3..c0
+; copy zpage to GhostParm
+
+8763 Ghost0
+8768 Ghost1
+
+
+
+7d38 Music
+;
+; also have key,joystick check inside
+;
+
+7d80 loadZ60z61
+7d8d loadGhostXY
+
+7d9a offsetG
+; offset the X (zc) and Y (tmpY at z10) by 4
+7da9 offsetPacman
+; offset the position of Pacman by -5,-4 on X,Y
+
+
+7e1f drawShape
+7eef doDrawDeath
+
+88d9 doDrawGhost
+
+88ea CheckPac
+; skip the pacman ghost detection check at 8b34?
+
+8b9d CHEAT1
+;8b9f:f0 3c
+; 8ba0:0 *CHEAT*, but don't be too greedy or hang
+
+8a7d drawCageColor
+; the orange door of Ghost Cage

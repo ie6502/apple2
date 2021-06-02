@@ -1,0 +1,125 @@
+;
+; AppleWin will auto-load this file
+;
+; name it as A2_USER1.SYM
+; 
+
+; to avoid confusion when tracing,
+; 
+; rename A2_BASIC.SYM to A2_BASIC.SYM.stop
+
+
+;
+; After adding more symbol, reload (case doesn't matter):
+;
+; SYMUSER clear
+; SYMUSER load
+;
+
+; when tracing, use F11 to save state, F12 to re-load state
+
+
+;
+; below are name for tracing Wayout
+;
+
+
+; normal trace, f7 15 times for a loop for 
+;
+
+; right "white lazer"
+; bload "lazer.bin", 7300
+; bsave... 7300,74ff
+
+; Start: 2DFD
+; End: 9000
+
+
+00 z00
+01 z01
+02 z02
+03 z03
+04 z04
+05 z05
+06 z06
+07 z07
+08 z08
+9 z09
+A z0A
+B z0B
+C z0C
+D Z0D
+E Z0E
+F z0F
+10 z10
+11 z11
+12 z12
+13 z13
+14 z14
+15 z15
+16 z16
+17 z17
+
+18 z18
+19 z19
+1a z1a
+1b z1b
+1c z1c
+1d z1d
+1e z1e
+1F z1f
+20 z20
+
+26 z26
+27 z27
+
+
+
+;readPDL1
+; 
+; up,central,down: 
+
+
+
+; decLife
+; decrease Life here *CHEAT* change CE DEC to 2C
+
+;---------------
+;
+;
+;---------------
+;---------------
+;1200 YtabL
+;1300 YtabH
+
+;601c initial life (6=4)
+;621a init life 2? (5)
+
+; 61ba 6 *CHEAT as 0*
+
+6859 clrHGR
+6872 clrHGR2
+
+68d7 life
+63d6 initScore
+
+;69ab:E *CHEAT* change to 5F fast clear 
+;69af:8 *CHEAT* change to 5F very wide collison area 
+;
+
+69d0 cmpp
+; 69d1:1 was 8
+; 69e3:1
+
+69e6 whatCollide
+
+
+
+6aa8 writeSCbox
+
+
+; 6cfe:b9 *CHEAT* change to 60 invincible
+6caf spkr_1
+
+; 969f init life 3 (6)
+

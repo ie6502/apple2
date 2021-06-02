@@ -1,0 +1,156 @@
+;
+; AppleWin will auto-load this file
+;
+; name it as A2_USER1.SYM
+; 
+
+; to avoid confusion when tracing,
+; 
+; rename A2_BASIC.SYM to A2_BASIC.SYM.stop
+
+
+;
+; After adding more symbol, reload (case doesn't matter):
+;
+; SYMUSER clear
+; SYMUSER load
+;
+
+; when tracing, use F11 to save state, F12 to re-load state
+
+
+;
+; below are name for tracing Wayout
+;
+
+
+; normal trace, f7 15 times for a loop for 
+;
+; bpx 9a6 demo??
+; bpx 1052  (indirect jump
+; bpx 1047 (erase something
+; bpx 
+; bpx 1437 (done stars)
+; bpx LoopUpdate
+; bpx 10a8 (untilXMinus
+;
+
+; right "white lazer"
+; bload "lazer.bin", 7300
+; bsave... 7300,74ff
+
+01 X_sav
+0002 zShipYvel
+0003 zShipXvel
+4 zShipY
+5 zShipXDiv7
+6 zShipBitmapStart
+;
+; 6 also determine ship direction, 0 forward to right
+;   37, backward to left
+;
+7 z07
+8 z08
+9 z09
+A z0A
+B z0B
+C z0C
+D Z0D
+E Z0E
+F z0F
+10 z10
+11 z11
+12 zYpos
+13 zXpos
+14 zTypeM1
+15 z15
+16 z16
+17 z17
+
+18 tmpX
+19 z19
+1a z1a
+1b z1b
+
+
+
+001c tmpAnd
+; original byte from screen
+
+; or bitmapAddr
+001d tmpOr
+1e zPDL1
+1F height_PDL0
+20 z20
+
+26 pHires
+27 pHiresH
+
+51 zButton0
+
+a04 testESC
+a16 testCtrlR
+
+a7b testBtn0
+; 26fe(80, no press)
+; 26fb(old? xor80
+;
+a8a testJoy0
+; call 9049 to get y, sty 26fc
+; return Y as  00,80,FF on left/central/right 
+
+a9b readPDL1
+; 
+; up,central,down: 26fd<-00,80,FF
+
+;
+;dca
+;
+
+f37 shoot
+
+123e clrMov
+; clear 2299 to 229c
+
+11e4 decLife
+; decrease Life here *CHEAT* change CE DEC to 2C
+
+
+124f testX
+
+; 1804
+
+213f check
+; check color of head byte for 2a, 55,5.. if so, put 1 to 229d
+;
+; wall *CHEAT* 215b, 2181:0
+
+
+;
+; get Y from 26fc
+; if y >= D4, 229b<-1
+; if y <2a , 229c<-1
+
+2745 bitC000
+; look for 9e (ctrl-^) & 9d (ctrl-])
+
+
+2800 startGame
+; change graphic mode
+
+;29ee  lda #$3 sta 23cb (life)
+;
+
+2c47 code
+;...
+
+7d00 div7tab
+7e80 YtabLo
+7f51 YtabHi
+
+8c4d ctrlS
+
+9049 PDL_1
+;
+; return Y as  00,80,FF on left/central/right 
+;

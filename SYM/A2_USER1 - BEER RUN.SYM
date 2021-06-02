@@ -1,0 +1,207 @@
+; BEER RUN
+;
+;
+; INF. LIFE
+
+; 1E20:2C ignore DEC LIFE
+;
+; CHEAT
+; Disable Greenman
+;
+; 85E:2c   ;pure draw
+; 8DA:2c   ;draw and update, check logic
+;
+; Alien (disable 9ff so alien traped on stairs
+;
+; a36:2c
+; 12e4:2c
+; 1332:2c
+; 13b0:2c
+; 142e:2c
+; 14a5:2c
+
+;
+; AppleWin will auto-load this file
+;
+; name it as A2_USER1.SYM
+; 
+
+; to avoid confusion when tracing,
+; 
+; rename A2_BASIC.SYM to A2_BASIC.SYM.stop
+
+
+;
+; After adding more symbol, reload (case doesn't matter):
+;
+; SYMUSER clear
+; SYMUSER load
+;
+
+; when tracing, use F11 to save state, F12 to re-load state
+
+
+;
+; below are name for tracing Wayout
+;
+
+
+; normal trace, f7 15 times for a loop for 
+;
+
+; right "white lazer"
+; bload "lazer.bin", 7300
+; bsave... 7300,74ff
+
+; Start: 2DFD
+; End: 9000
+
+
+00 z00
+01 z01
+02 z02
+03 z03
+04 z04
+05 z05
+06 z06
+07 z07
+08 z08
+9 z09
+A z0A
+B z0B
+C z0C
+D Z0D
+E Z0E
+F z0F
+10 z10
+11 z11
+12 zNextAlien
+13 z13
+14 z14
+15 z15
+16 z16
+17 z17
+
+18 z18
+19 z19
+1a z1a
+1b z1b
+1c z1c
+1d z1d
+1e z1e
+1F z1f
+20 z20
+
+26 z26
+27 z27
+
+; BLT parameter
+57 zY
+58 zYEND
+59 zX_
+5A zXEND_
+5F zXREG
+
+
+;readPDL1
+; 
+; up,central,down: 
+
+C64 INITLIFE
+; initial Life = 3
+;
+621F LIFE
+
+; decLife
+; decrease Life here *CHEAT* change CE DEC to 2C
+
+;---------------
+;
+;
+;---------------
+;---------------
+7B02 YtabL
+7A3A YtabH
+
+83E doAirShip
+
+84F Loop0
+
+855 GameLoop
+85E doGreenmanDraw
+;
+
+8d7 doPage2Mandraw
+8da doGreenmanLogic
+; disable will not move greenman, and thus by pass
+
+
+
+9FF handleAlienDown
+; disable not show animation of Alien go up/down ladder
+; seems keep moving but invisible
+;
+
+a98 bltAlienPage2
+
+d3f page1Man
+; disable will not redraw the man on page 1, result in flashing
+ea5 bltHT
+; bitblt the top or bottom of player
+; if disable the leg or head after animation will remain on screen
+
+
+
+109E PRT_DIGIT
+; print life etc
+
+1280
+; disable will not erase alien's tail
+
+15cb orBLT
+
+167C blt
+; Blt alien
+
+
+192A setLadder
+; draw all ladder
+
+195A reDrawLadder
+;
+; disable will avoid alien, but ladder flashing
+;
+
+1CFC revealLadder
+; animation loop to bottom up the ladder
+
+1d79 DeathAnim
+; player fall down after collison
+1E20 DEC_LIFE
+
+6303 beerA
+; disable will have flashing beer always on one row, but cannot pick up
+
+67D3 eraBlt
+;
+
+6B31 ctrlMan
+
+6DAA AirShipLoop
+; draw Sirius airship loop
+6DF8 handleInput
+;
+6f59 Page1bltGreen
+
+709F Pg2_greenmanLogic
+; draw on page 2, as well as collison check
+
+7176 idiotX_
+7178 idiotX2_
+7179 idiotY
+
+755E alienX_
+7564 alienY
+
+BC40 getInput
+; key input

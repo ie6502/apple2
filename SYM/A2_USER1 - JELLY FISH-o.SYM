@@ -1,0 +1,126 @@
+; JELLY FISH
+;
+; SEE CHEAT JELLY FISH.TXT
+;
+; really messy code
+;
+
+
+;
+; AppleWin will auto-load this file
+;
+; name it as A2_USER1.SYM
+; 
+
+; to avoid confusion when tracing,
+; 
+; rename A2_BASIC.SYM to A2_BASIC.SYM.stop
+
+
+;
+; After adding more symbol, reload (case doesn't matter):
+;
+; SYMUSER clear
+; SYMUSER load
+;
+
+; when tracing, use F11 to save state, F12 to re-load state
+
+
+;
+; below are name for tracing Wayout
+;
+
+
+; normal trace, f7 15 times for a loop for 
+;
+
+; right "white lazer"
+; bload "lazer.bin", 7300
+; bsave... 7300,74ff
+
+; Start: 2DFD
+; End: 9000
+
+
+00 z00
+01 z01
+02 z02
+03 z03
+04 z04
+05 z05
+06 z06
+07 z07
+08 z08
+9 z09
+A z0A
+B z0B
+C z0C
+D Z0D
+E Z0E
+F z0F
+10 z10
+11 z11
+12 z12
+13 zHIRES_13
+14 zH_14
+15 z15
+16 z16
+17 z17
+
+18 z18
+19 z19
+1a z1a
+1b z1b
+1c z1c
+1d z1d
+1e z1e
+1F z1f
+20 z20
+
+26 z26
+27 z27
+
+; BLT parameter
+
+
+FE zHires_FE
+FF zH_FF
+
+;readPDL1
+; 
+; up,central,down: 
+
+
+b04 upColl
+
+
+; decLife
+; decrease Life here *CHEAT* change CE DEC to 2C
+
+;---------------
+;
+;
+;---------------
+;---------------
+;7B02 YtabL
+;7A3A YtabH
+
+
+88E9 tstBtn0
+; btn0 to 7B
+; btn 1 to 7C ;check at 9C7C
+; paddle 1 at 1d32
+;
+; 9d27..
+; test 1C04=10, 1C05=4, 1D5A=13, but it is assign to 1c04+1c05
+; 9d31 axy=1c00,1c04,1c0a (0,10,1) bne 9D4A..
+
+
+;a0ef:2c 2c (disable shape distorted)
+;a10a:2c (skipped many rendering, still collide)
+
+; a37b: disable partial shape
+a38b CMP_AF
+; compare Y?
+

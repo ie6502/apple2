@@ -1,0 +1,168 @@
+; AUTOBAHN SIRIUS
+
+; CHEAT no collison
+; 1950:60
+;
+; INF. CAR
+; 1A33:A5
+
+
+04 zY2
+05 zYEnd2
+06 zX2_
+07 zXend2_
+
+;-----------------
+; Blt parameters
+70 zShape
+; shape at 8000,8100~ etc
+72 zYend
+71 zY
+73 zX_
+74 zXend_
+
+
+d3 firstL
+d4 firstH
+; BCD of Top mile
+DB fstFrac
+; the inversed first digit fraction?
+
+
+d0 milesL
+d1 milesH
+; BCD of miles
+
+DA mileFrac
+; the inversed mile digit fraction?
+
+
+
+d6 speedL
+d7 speedH
+; BCD of speed
+
+
+d9 cars
+; car remains??
+
+FC zPg1
+; 0:HGR1 
+; 1:HGR2
+
+;readPDL1
+; 
+; up,central,down: 
+
+
+
+; decLife
+; decrease Life here *CHEAT* change CE DEC to 2C
+
+;---------------
+;
+;
+;---------------
+;---------------
+8C0 YtabL
+800 YtabH
+
+990 road1
+; draw 3 lines of road on top
+
+a10 doR
+a19 doR1
+; call ~ 9d8 ~ 990 to draw a segment of road on top
+
+ad2 drawPly
+; is it moving or just launch?
+
+b77 sb77
+
+ba0 sba0
+
+ba9 sba9
+; before death
+
+
+; stack 1e0: 
+; d75 c37 d45
+;
+
+d4c sd4c 
+
+f00 redrawUI
+
+fb0 drawReCar2
+; the second car remain on right UI box
+fd0 drawReCar1
+; the first car remain on UI
+; FE4 hard coded 1 car bitmap
+f60 bltRemainCar
+
+
+1000 bltSpeed
+; print the speed digit
+1040 bltMile
+; print the mile digit
+1080 bltFirst
+
+10C0 prtSpeed
+10E0 prtMile
+1110 prtFirst
+1140 prtFmile
+; fraction digit of mile
+11A0 prtFfst
+
+13c8 blt2
+
+1480 bltCar
+; used for : purple car 1
+
+17FC rotateCar
+; player crash rotation
+;
+
+18A0 beep1
+
+1920 beepPg2
+
+1950 triggerCrash
+; 1950 call 1900 that do  rotate car crash animation
+; 1950 is  called by 1930, somewhere from 1980
+;
+; 19cd test bike, truck
+; B1 ??bike Y? B2 bike X_
+;
+; $A player Y $B player Yend?
+; C player X_ D player Xend_ ?
+;
+; 19eb green car with purple engine cover
+;
+; 1a09 fireengine from behind
+;
+
+
+1A30
+; after drawn last rotate car (blank on screen)
+
+1A33 decLife
+; subtract one car from life C6 D9 
+;
+1a50 wait10
+
+1a60 cmp1
+
+1B00 cpyHGR
+
+1B7B S1b7b
+1b80 s1b80
+
+1c30 beep2
+1c60 s1c60
+1cc0 chkDE
+1BB0 flipX
+1BC0 flip0
+1BE0 getKey
+
+1f00 clrPg1

@@ -1,0 +1,196 @@
+; SPACE EGGS
+;
+; HISCORE can go up to 9995
+;
+; will have not able to kill enemy error after 8,9th time of score roll over,
+; object appeared as explosion
+;
+; INF. LIFE
+
+; 1E20:2C ignore DEC LIFE
+;
+; CHEAT
+; Disable Collison
+; 1B90:60
+;
+; No need to release button to fire next shoot
+; D78:0
+
+
+;
+; AppleWin will auto-load this file
+;
+; name it as A2_USER1.SYM
+; 
+
+; to avoid confusion when tracing,
+; 
+; rename A2_BASIC.SYM to A2_BASIC.SYM.stop
+
+
+;
+; After adding more symbol, reload (case doesn't matter):
+;
+; SYMUSER clear
+; SYMUSER load
+;
+
+; when tracing, use F11 to save state, F12 to re-load state
+
+
+;
+; below are name for tracing Wayout
+;
+
+
+; normal trace, f7 15 times for a loop for 
+;
+
+; right "white lazer"
+; bload "lazer.bin", 7300
+; bsave... 7300,74ff
+
+; Start: 2DFD
+; End: 9000
+
+
+00 z00
+01 z01
+02 z02
+03 z03
+04 z04
+05 z05
+06 z06
+07 z07
+08 z08
+9 z09
+A z0A
+B z0B
+C z0C
+D Z0D
+E Z0E
+F z0F
+10 z10
+11 z11
+12 z12
+13 z13
+14 z14
+15 z15
+16 z16
+17 z17
+
+18 z18
+19 z19
+1a z1a
+1b z1b
+1c z1c
+1d z1d
+1e z1e
+1F z1f
+20 z20
+
+26 z26
+27 z27
+
+F8 ShipType
+; player type that determine fire and shipY
+FA ShipShift
+; value from 0 to 7 to get preshift shape
+;
+
+F9 ShipX_
+FD ShipY
+;readPDL1
+; 
+; up,central,down: 
+
+800 YtabH
+8C0 YtabL
+
+
+b00 uptDrawStar
+
+bc0 blt1
+;
+; bitblt with direct store, used for enemy
+
+
+BF0 bltPlayer
+;
+
+c26 bltExhaust
+;
+; the flame of the spaceship
+; 
+CA0 GetPDL
+
+D00 drawPlayer
+DE0 testFire
+; handle Btn0
+
+; 114A set 9e to D1 (Y?)
+; F9 - 0, store to D2 (??)
+; FA+0 (with previous Carry flag from last Subtraction), cmp 7, inc D2 
+; store some value to 1182 (some mod value?)
+;
+
+12c0 TestFire
+; can player fire ?
+
+12C6 addFire
+; test F8 before next call
+; 114a, 12F0, 1300, 1310
+
+1400 blt3byt
+; direct draw 3 byte width
+
+
+1428 EraBlt
+; erase block transer
+
+1450 repoFire
+; erase, move up and redraw player fire
+
+148e repoFire2
+; erase, move up and redraw player higher level fire 
+;
+
+14D0 repoFire3
+; erase, move up and redraw player highest level fire 
+
+
+1510 updFire
+; erase, move and redraw all player fire, not collison check yet
+
+1540 eraEnemy
+1570 bltE
+
+1B90 testShipCollision
+; 
+1d50 oneEnemy
+;---------------
+;
+;
+;---------------
+;---------------
+
+4900 GameLoop
+490C doTstFire
+
+
+;effect of disabling any routine
+;4900 star not move
+;4903 no observable effect
+;4906 not erase ship left most correctly
+;4909 no observable effect
+
+;490F player not firing too
+;4912 no observable effect
+4915 doGetPDL
+; affect F9,FA,FB
+
+;4918 no observable effect
+;491B no enemy after death
+
+
+4909 drawInitialEnemy

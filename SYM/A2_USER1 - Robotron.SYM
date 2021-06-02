@@ -1,0 +1,909 @@
+;
+; AppleWin will auto-load this file
+;
+; name it as A2_USER1.SYM
+; 
+
+; to avoid confusion when tracing,
+; 
+; rename A2_BASIC.SYM to A2_BASIC.SYM.stop
+
+
+;
+; After adding more symbol, reload (case doesn't matter):
+;
+; SYMUSER clear
+; SYMUSER load
+;
+
+; when tracing, use F11 to save state, F12 to re-load state
+
+
+;
+; below are name for tracing Wayout
+;
+
+
+; normal trace, f7 15 times for a loop for 
+;
+
+; right "white lazer"
+; bload "lazer.bin", 7300
+; bsave... 7300,74ff
+
+; Start: 2DFD
+; End: 9000
+
+;4000, MOVE 2E00..39FF TO 800.13FF
+;  MOVE  3A00.3FFF TO 100,7FF
+; 4018 jsr 512f
+; 402d switch to Hires
+; pre-shift to bitmap from 9000 to bfff
+;
+; 5148 JSR 4c67 7a01.. 
+; 7a00.. 7dff table of pointer to bitmaps
+;   format: width, height, 7 set of bitmaps address
+;
+; 7e79.. 893x original bitmap
+; copy 8200 to 9000..
+; 9000 -> 9014  (right-shift the shape from 9000 to 9014)
+; 9014 right-shift to 9028.. 
+; 9028 ..903C..
+
+00 idx
+01 z01
+0002 z02
+0003 z03
+4 z04
+5 z05
+6 pHGR_X
+;
+; 6 also determine ship direction, 0 forward to right
+;   37, backward to left
+;
+7 z_Y
+8 pBmp
+9 z09
+A z0A
+B z0B
+C z0C
+D Z0D
+E Z0E
+F z0F
+10 z10
+11 z11
+12 z12
+13 z13
+14 z14
+15 z15
+16 z16
+17 z17
+
+18 z18
+19 z19
+1a z1a
+1b z1b
+001c z1c
+001d z1d
+1e z1e
+1F z1f
+20 z20
+
+26 z26
+27 z27
+
+
+FC bmpL_ySav
+;
+; FC also pYtabL
+; FE also pYtabH
+
+FE bmpH
+
+800 pShapeL
+820 pShapeH
+; pointer to shapeTable address
+
+960 pUnknownL
+964 pUnknownH
+
+;testESC
+;testCtrlR
+
+;testBtn0
+
+;testJoy0
+; return Y as  00,80,FF on left/central/right 
+
+;readPDL1
+; 
+; up,central,down: 
+
+
+
+; decLife
+; decrease Life here *CHEAT* change CE DEC to 2C
+
+
+; bitC000
+; look for 9e (ctrl-^) & 9d (ctrl-])
+
+
+; startGame
+; change graphic mode
+
+1295 T1295
+1395 T1395
+1400 shotCnt
+; player shot count
+1407 v1407
+1408 v1408
+
+C00 MAXSHOT
+; 8
+c08 HumanWait
+c09 maxMove
+c50 maxSpread
+;
+; used for randomXX
+;
+
+1500 playerX
+1501 playerY
+1502 u1502
+1503 u1503
+
+1421 shotDDDIR
+
+1416 u1416
+;
+1401 CountWhat
+141c C_141c
+1424 nextEXshotWait
+
+1425 K_DELAY_EXshot
+; 30
+
+142A CountTshotMaybe
+;
+; *CHEAT*
+;
+;1)  40c7:4c d7 40
+;
+;   by pass death, but leave incomplete player render
+;2)
+;   538d:60 
+;      ignore touched something on render, so no human rescue
+;3) 53b5:4c d4 53
+;
+;     Best By pass
+;
+
+
+;
+; *cheat* FAST SHOT 5411:1 
+;           (OR 0, BUT MIGHT BE INVISIBLE)
+;         C00:10 MAXSHOT
+;
+;         C6b:5C (WAS c) FAST ROTATE SHOT
+
+
+
+;---------------
+142D SkullCount
+; max 8 on the screen
+1F10 skullA
+1F00 SkullXdiv7
+1f20 SkullFrame
+1f30 skullTimer
+
+
+;---------------
+141D LightningBolts
+; max 8 on the screen
+1cc0 LB_1
+1c80 LB_y 12 <-Y
+1c70 LB_X 5f <a
+1c90 LB_vx
+1ca0 LB_vy
+; 7555, reverse vx
+
+1cb0 LB_Down40
+1cdo LB_Ref_VY
+
+C2E KON_lb_TAIL
+;length of tail, 7
+; basically the tail delayed 7 times before
+; catch up with head
+
+
+;---------------
+1426 Count1426
+;---------------
+141A Pr_W20
+141B PROGCount
+1419 Pr_wai30
+
+C23  konPROG20
+; constant 20
+C28  konPROG30
+; constant 30
+C2A  konPROG
+; tail delay of PROG, 6, change to 9 is OK
+
+
+
+D3E PR_VEL6X
+D42 PR_VEL6Y
+; VELOCITY +/- 6, AND 2 ZERO
+
+
+; constant 6
+1BB0 PR_bw_X
+; Frame Offset to get Bitmap address
+1BD0 PR_Y
+1BD1 PR_Y1
+1BF0 PR_LFT_RGHT
+1BF1 PR_LFT_RGHT2
+1C10 PR_70
+1C11 PR_70_2
+1C30 PR_LFT_RGHT3
+1C31 PR_www
+1C50 PR_DAD_MOM
+1c51 PR_w30
+
+;---------------
+1418 BrainCount
+; Brain
+
+1B90 BrainWash
+c24 konBWait
+; Brain wait for 4 times before moving
+c25 konBFindFamiWait
+;4
+1B60 B_MoveWait
+1B70 B_FindFamiWait
+1B40 B_Frame
+1BA0 B_LeftRight
+; facing left or right ?
+1B50 B_Target
+; hold index of Family Victim
+
+; max tank movement is 0x18?
+
+1B20 BrainX
+1B30 BrainY
+
+1B80 B_FireDelay
+; how long Fire the Lightning bolt
+
+
+;---------------
+;
+; test Quark only on stage 57
+;
+;---------------
+1429 TShotCount
+; Tanker shot
+
+1E90 TshotWait
+c4F konTSWait
+; wait is 1
+; height is 0x7
+1E50 TShotX
+1E60 TShotY
+1E70 TShotVX
+1E80 TShotVY
+1EA0 TS_timer
+
+;---------------
+1428 TankerCount
+; Tanker
+
+1DF0 TankWait
+c4E konTWait
+; wait is 2
+c4B konTF
+; max tank movement is 0x18?
+
+1D70 TankX
+1D90 TankY
+1DB0 TankVx
+1DD0 TankVy
+1e10 TankAnd
+1e30 TankEor
+
+
+;---------------
+1427 QuarkCount
+; Quark will release Tanker 
+
+1D20 QWait
+c4D konQWait
+; wait is 2
+c4A konQF
+c58 MAXtank
+; max tank is 0x10 on screen...
+;
+; height is 0xD
+
+1ce0 QX
+1cf0 QY
+1d00 Qvx
+1d10 Qvy
+1d30 Qframe
+1d60 Q6
+1d50 Q5
+
+;---------------
+140e SpheroidCount
+; Spheroid count
+
+1A00 SpWait
+c18 konSpWait
+; wait is 3
+;1AF0 En4Timer
+; act as frame count when AND 0x01
+19c0 spX d1
+19d0 spY a8
+1A10 sp_10
+1A20 sp_20
+1a40 sp_40
+19e0 spVx
+19f0 spVy
+; height is 0xD
+
+
+;---------------
+140f EnforcerCount
+1A70 EWait
+1A60 En4Y
+1A50 En4X
+1A80 En4Vx
+1A90 En4Vy
+; wait is 3
+
+;---------------
+
+c1A konEXWait
+1410 EXCount
+1AE0 EX_Wait
+; wait is 3
+1AF0 EX_Timer
+; act as frame count when AND 0x01
+1AA0 EX_X
+1AB0 EX_Y
+1AC0 EX_Vx
+1AD0 EX_Vy
+1B10 EX_Vy2
+
+
+;---------------
+1409 HulkCount
+
+1930 HulkWait
+; wait is 3
+1940 HulkFrame
+1900 HulkY
+1910 HulkX
+1920 MapDirection
+; Height ?? E ??
+; jsr 4d21
+
+;--------------
+1403 GruntMaxRandomDelay
+1402 GruntCount
+16F0 GruntWait
+1670 GruntFrame
+15F0 GruntY 
+;eg.a0 -> a7 to z05
+1570 GruntX
+; eg. cc+3 to cf to jsr Div7
+;
+;4c1c div7 sta e0.., 0 to ge, 8 
+;
+884 pp0
+888 pp1
+88c pp2
+
+890 DirBitmapOffset
+898 DirBitOfsH
+;
+; off set for Hulk
+;
+
+d14 Yvelocity
+d18 Xvelocity
+
+;------------
+140a PaCount
+19a0 PaWait
+19b0 PaFrame
+1990 PaTab2
+1970 PaIdxVX
+1980 PaVy
+1960 PaY
+1950 PaX
+
+d1c peopleVX
+;-----------
+142c Ocount
+1ED0 Owait
+
+
+8a0 T8a0
+8b0 t8b0
+
+e00 NumGrunt
+e80 NumE80
+f00 Numf00
+f80 Numf80
+1000 num1K
+1080 NumEn4
+1100 NumBrain
+1180 NumQuark
+
+1405 Zcount1
+
+
+
+
+
+1407 stage
+
+1417 ctrlType
+; control type, 0=Keyboard, 1=Joystick, 
+;               2=Paddle, 3=Keyboard + Joystick
+;
+
+
+1508 PROG_LOOK
+1509 life
+150A scoreL
+150B scoreM
+150C scoreH
+; score is 24-bit
+
+1510 shotBitAddr
+1520 shotOXdiv7
+1540 shotWWW
+; shot up-right is 0xD? dec 1540
+1550 shotHPattern
+; horizontal shot's pattern 
+
+1770 zoomY
+17c0 zoomXdiv7
+
+1810 zoomPattern
+1860 zoomVx
+18b0 zoomSwap
+; time to swap 
+
+
+;1FD0-1FFF reserved area for drawing out of screen
+; for example, the zoom effect that exceed the screen..
+4063 callDoDemo
+4066 ask
+
+4090 gameLoop
+4093 chkClr
+; check clear?
+;
+40AC anime1
+; continue to anime obj
+;40Af CHECK CONTROL VIA 4110
+;40B2 CALL 425B TO DO SOUND
+;40B5 CHECK CONTROL AGAIN
+;40BB jsr 4171 ; check paddle and joystick control
+;
+;40c4 jsr 5203... bcc 40d7
+;40c9 death Bell?
+;40cc dec life
+;
+40d7 anime2
+;40da keyboard control check
+;40dd jsr 5a09, call 5b7e
+;
+
+4110 testKEYY
+
+4171 testPDL2
+425b doSound0
+42f8 chkClear
+; check stage clear by all EnemyCount?
+; 1402 Red
+; 140F, 140e, 1418, 1427, 1428
+; 
+; CLC not complete, SEC if completed
+;
+
+43C0 initEnemies
+
+4424 do6200
+4427 do6900
+442A LoadEnmCount
+449d bitBlt449d
+4514 doDemo
+4517 retDemo
+;
+; user press Space, Enter... and return from demo here
+;
+
+4522 demo
+; call 455E to draw Robotron title animation
+;
+4525 story1
+; Inspired by..
+452b story2
+; You are the last hope...
+
+453D chkC000_1
+
+4595 fadeIn 
+; loop for fade in title using 50c0
+
+45c5 d2048
+; call to draw 2048
+
+
+4bd7 ctrlOpt
+; check control option 1234, "JKP&" 4,"&" is key+joy
+;
+
+4C00 DivXth
+4c1c DIV7
+; ro E0, E2
+;
+
+4c36 getRandom
+;
+; use the standard seed on 4E,$F plus $FC,ScoreL
+;
+
+
+4c4b gar_Math
+4c4f roundNum
+4c6e soundBit
+4c7b doneSB
+
+4c7c getBitADR
+4CaC draw2
+
+4cd0 draw1
+4cf6 drawOVER
+;
+; draw by directly overwrite
+;
+4d21 Erase1
+; erase for Hulk..
+
+4D4A SwipeScreenAnimation
+
+4DD0 scoring
+;
+; 5C97 5F39 669A 66FE 6772 6E93
+; 6EFC 6F6A 7447 75E2 793D
+;
+
+4E1F prtSC
+
+
+4E4F BltMan
+; draw number of man from 1509, start from Ypos 60 downward
+; if Ypos exceeded A5, exit
+
+4EC4 convertNum
+4EF1 DeadScene
+4F42 UI
+; 4F42 call clrHires, draw Score, man, round#
+4f25 clrHires
+
+
+4fcd andErase
+; 4E35.. prt a digit
+;
+4ffe orDraw
+;
+; the first byte of each line is always Store draw,
+; then 2nd, 3rd byte is Or Draw
+
+5059 orDraw2
+50A1 s50A1
+
+50C0 fadTitle
+50CA draw2048
+; draw the bitmap for "2048"
+5108 prtDigit
+; A: char, X:  Xdiv7 Y: Y ypos (from $FC)
+;
+; 80A8-AF (bitmap for "5", 7 times, draw from bottom up
+; i.e. 80AF, 80AE...80A8
+
+
+51B8 prtStr
+51BE getTxt
+; call advTxtPtr..
+
+51CB testChr
+; see if char is 0xD, yes,
+;  fetch 2bytes to E0, E1 (Xdiv7, Ypos)
+;
+; jmp 51BE
+; 
+51E8 advTxtPtr
+; advance text pointer
+
+5203 doCollide
+5206 doShoot
+5209 doShotDir
+
+522e collison
+
+
+53EC setShotDir
+; set Shot Direction?
+
+54e5 shotUp1
+54ef shotRight
+; seems to set show direction bitmap
+
+551D Shoot
+
+575b SupRight
+; shoot up right
+;
+
+5794 loopRshot
+; loop to draw up right shot
+57BE shotShiftR
+; the shot pattern is shift right on each draw loop
+; to simulate a slant shot to the right
+;
+5837 EraseShot
+
+5855 EraseVertShot
+5883 Erase2VertShot
+58b9 EraseSlantS
+58EE Erase2SlantS
+5924 EraseShot924
+
+5959 rmShot
+598d Sub598d
+;
+; erase veritcal shot
+
+59aa testShotWhichEnemy
+
+5a00 doInitG
+5a03 doInitH
+5a06 doInitFami
+5a09 doGrunt
+5a0c doHulk
+5a0f doHuman
+5a12 doHitG
+5a15 doHitHulk
+5a18 doRescueFami
+5a1b doEraseZ
+5a1e doZoom
+5a21 doRmFami
+5a24 doGenSkull
+5a27 do61b9
+5a2a InitGrunt
+; place Grunts and Hulks
+
+5AB1 InitHulk
+5B26 InitFami
+
+5B45 PlaceFami
+
+5b7e grunt1
+5bf2 Hit_testG
+5c06 HitTestG
+5c3f rmGrunt
+
+5c9f Hulk0
+5d76 H_kill_fami
+5dbe shotHulk1
+5dd2 shotHulk2
+5df4 shotHulk3
+5e26 kickHulk
+
+5e60 sHuman
+5f52 removeFami
+5f57 rmF_loop
+
+5f8a eraseZoom
+5Fe3 zoom1
+5ff0 zoomIn2
+
+
+6073 fami_Hit
+
+6127 makeSkull
+6157 SkullLoop
+
+6200 doInitSphere
+6203 doSpheroid
+6206 doEnforcer
+6209 doEn4Shot
+620c doTestSphere
+620f doTestEn4
+6212 doTestEnX
+6215 doUpdateHighScore
+6218 doDrawHighScore
+
+621b InitSphere
+
+
+62be Spheroid
+
+6436 Enforcer
+; Enforcer Animation
+
+64A8 prepareExShot
+64FF exit_preEX
+6500 newEXVel
+6523 EXShot
+; Enforcer Shot
+65d9 rmEXShot
+
+6643 testHitX
+6657 test_HitX
+6678 killX
+6617 rmX
+
+669f hit_testSphere
+66b3 hitSP
+66d4 sub_SP
+
+
+670E testHitEn4
+6722 test_HitE
+6745 killEn4
+4f74 Explode
+6617 rmEn4
+
+6789 tryNewEXshot
+
+67b8 EXaimX
+67D1 randomEXVel
+67EE EXdirectAim
+
+6832 initialEXvel
+684e UpdateHighScore
+
+686a DrawHighScore
+
+6900 doInitQ      
+6903 doQuark
+6906 doTanker
+6909 doTankShot
+690c doTestQuark 
+690f doTestTank
+6912 doTestTshot
+6915 InitQuark
+
+
+6a0f Quark
+6ae6 genTanker
+
+6b3a randomXX
+; call by Q, A=TankX, Y=player X
+;
+6b7a exit_QRandom
+6b7b Tanker
+6b7e T_whileLoop
+6c2f Flip_tankEor
+6c38 new_T_Vel
+
+6c67 TankShot
+6c6A TS_while
+6cd3 ts_draw
+
+6cf2 rmTshot
+
+6d24 newTankShot
+6dF0 rmQuark
+6E34 testHitQuark
+6E48 testHitQ
+6E6C killQuark
+
+
+
+6E98 testHitTank
+6EAC testHitT
+6ECF killTank
+6F6F rmTank
+
+6F13 testHitTShot
+6F27 testHitTS
+6F48 killTshot
+6cf2 rmTshot
+
+
+7000 doResetDemoVar
+7003 doBrain
+7006 doPROG
+7009 doLightningBolt
+700c doAttackBrain
+700f doTestPROG
+7012 doTestLightning
+7015 ResetVar1
+
+
+70ca Brain
+70f0 B_1
+7102 B_2
+7131 chaseHero
+713d chaseFami
+714f b_above
+7153 Below
+715b b_within2
+;Y difference within 2
+715e B_higher
+7162 B_goDown
+7166 B_goUp
+7168 B_updateY
+7176 B_goRight
+7181 Behind16
+718E B_goLeft
+719b notClose
+71A4 BgetFrame
+71c9 genLightning
+
+721a b_draw1
+7224 b_draw2
+7278 B_wash
+72D9 B_find_Human
+; Brain washing flash effect
+7314 PROGhuman
+
+73A3 AttackBrain
+73B7 testHit_B
+73d8 KillBrain
+7415 KillBwasher
+
+7458 RET_no_Q_BW
+7479 rmBrain
+74bd LightningBolt
+
+
+;
+; 74ec:1
+; 764a:1 
+; thinner lightning bolt
+;
+7546 updateLightning
+
+
+7585 testHitLightning
+75A4 testHitLB
+75D5 killLightning
+75F9 rmLightning
+
+7628 eraseLightning
+76f1 PROG
+76f6 PROG1
+76f8 PROG2
+770B PROG3
+771d callEraseT
+7775 PR_goNext
+7778 PR_erase_tail
+779D PR_ret1
+779E PR_POS_UPDATE
+; UPDATE POSITION
+77BB PROG_X_ok
+77D9 PROG_Y_OK
+77dd s77dd
+7821 XorPROG1
+
+788A testHitPROG
+78A1 testHitP
+78C2 killTshot
+7942 rmPROG
+;
+7979 B_Close_Fami
+;7d00 div7tab
+1200 YtabL
+1300 YtabH
+

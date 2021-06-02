@@ -1,0 +1,127 @@
+; digdug (4am crack)
+;
+
+; Dig Dug Max out at Round 99, and stay there forever
+l MAX Score is 9.9 Million.
+;
+; SCORE: 8B..8E low to Hi. 
+; E.g.   30 54 76 98  =score mean 98765430
+; 
+
+00 z00
+01 z01
+02 z02
+03 z03
+04 z04
+05 z05
+06 z06
+07 z07
+08 z08
+9 z09
+A z0A
+B z0B
+C z0C
+D Z0D
+E Z0E
+F z0F
+10 tmpY
+11 z11
+12 z12
+13 z13
+14 z14
+15 z15
+16 z16
+17 z17
+
+18 z18
+19 z19
+1a z1a
+1b z1b
+1c z1c
+1d z1d
+1e z1e
+1F z1f
+20 z20
+
+26 z26
+27 z27
+
+97 drawPg
+; current drawing Page, not the display page
+
+; c9
+
+;readPDL1
+; 
+; up,central,down: 
+
+
+
+; decLife
+; decrease Life here *CHEAT* change CE DEC to 2C
+
+;---------------
+;
+;
+;---------------
+; gameloop
+
+;---------------
+
+5c27 YtabH
+5b67 YtabL
+
+87c5 blt_1
+8d25 flipPage
+
+8d3c sound ; *** APT*** change to 60 to remove sound
+;8d7b dec cb?
+; 99ab?
+
+99bc gameloop
+99c6 doRockBonus
+99c9 doRockFall
+99cc doDrawEnemy
+99cf doMan
+;
+; even disable draw Enemy will still keep player
+;
+
+;9a28? death?
+
+9a81 paddles
+;a1cd 2c will stop game loop..
+
+;a1d0 bit?
+;a1d9 dec life *CHEAT* inf life change to a5
+
+
+;; 23c0:bf 97 80 f8 a8 
+
+;;23c8:bf ff fe fd
+; 87f6:b1 65  <-- change to a9 0
+
+
+; 8812:38
+; 8814:18   <-- need to dig the dirt
+
+; 8d12 38
+; 8d14 18
+;
+
+;-------------------
+
+; 
+; 99bc:a5 d9 
+; 99cc call draw enemy
+; 9825:85 d9 
+; 99cf:2c <-- don't call 97d7 won't move
+; 984d bit c1 (80)
+9874 harmless
+;
+;98f5 change 94/95
+;9921 call 8cf2 to check (Carry set at at 8d12/8d14)
+
+;-----
+97d4 MAN_it_up
+9801 set4_to_1ab6
