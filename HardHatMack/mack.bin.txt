@@ -53,44 +53,29 @@ SNDClickList    .dd1    $1d
                 .junk   1
 SNDfromTbl      .dd1    $ff
                 .dd1    $ff
-SND32           .dd1    $ff
-SNDskip?        .dd1    $00
+SNDloop120      .dd1    $ff
+SNDbneLoop4     .dd1    $00
 SNDclickCarry   .dd1    $f0
-SND35           .dd1    $fd
+SNDadd4Var      .dd1    $fd
 SNDdummyWasteCycle .dd1 $f0               ;meaningless variable that just increase
                 .junk   1
 timer1          .dd1    $13
 indexVar        .dd1    $fd
                 .junk   12
-ptrBoxX         .dd1    $00
-                .dd1    $00
-ptrBoxY         .dd1    $00
-                .dd1    $ff
-SndPtr          .dd1    $00
-                .dd1    $00
+ptrBoxX         .dd2    $0000
+ptrBoxY         .dd2    $ff00
+SndPtr          .dd2    $0000
 PointerToMusic  .dd2    $ffff
 protectionXorPtr .dd1   $75
                 .dd1    $ef
-ProtectionPtr2  .dd1    $ff
-                .dd1    $ff
+ProtectionPtr2  .dd2    $ffff
                 .junk   174
                 .junk   256
                 .junk   256
                 .junk   256
 junk0400        .junk   256
 protectionJunk  .junk   768               ;if zero'd will reboot
-                .dd1    $20
-                .dd1    $04
-                .dd1    $22
-                .dd1    $20
-                .dd1    $00
-                .dd1    $33
-                .dd1    $20
-                .dd1    $bf
-                .dd1    $71
-                .dd1    $4c
-                .dd1    $2d
-                .dd1    $08
+                .junk   12
 PlayerX         .dd1    $00
 InputType0K1Joy .dd1    $00
 isRestoreMuteSav .dd1   $00
@@ -106,14 +91,12 @@ PreshiftAddrHi  .dd1    $00
 isJump          .dd1    $00
 s3BoxFaceDirection? .dd1 $00
 MackJumpStep    .dd1    $00
-                .dd1    $00
+                .junk   1
 SavedKBD        .dd1    $00
 isMute          .dd1    $00
 skipTstKeyIf0   .dd1    $01
 PlayerGoUpFlag  .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
+                .junk   3
 pdlX            .dd1    $00
 pdlY            .dd1    $00
 XRegSave1       .dd1    $00
@@ -128,9 +111,9 @@ EnmCount        .dd1    $01
 ********************************************************************************
 * Main                                                                         *
 ********************************************************************************
-Start           lda     #$21              ;Set to Stage1
+Start           lda     #<St1_1           ;Set to Stage1
                 sta     goStage+1
-                lda     #$09
+                lda     #>St1_1
                 sta     goStage+2
                 sta     KBDSTRB
                 lda     #$00              ;ready for the title page
@@ -242,7 +225,7 @@ Stage1Loop      jsr     testPlayerYXat18
                 jsr     s1_fall_into_Hole
                 jsr     UptEnemies
                 jsr     tstEnm
-                jsr     tstEhammer        ;Bonus Item
+                jsr     tstHammer         ;Bonus Item
                 jsr     S1TstWelding
                 jsr     setMackMusic
                 jsr     doSound
@@ -256,7 +239,7 @@ Stage1Loop      jsr     testPlayerYXat18
                 jsr     TestS1Bell        ;did Player Ring the bell
                 jsr     doJackHammer
                 jsr     tstLIFT
-                jsr     s1_collpasMack?
+                jsr     s1_collapsingMack?
                 jsr     s1_TestLift
                 jsr     tstAddLIFE        ;check 7?
                 lda     #$01
@@ -344,10 +327,10 @@ InitLIFE        lda     #$02
                 lda     #$20
                 sta     PageNum
                 lda     #$01
-                sta     drawLevVlVar
+                sta     levelSingleDigit
                 lda     #$00
                 sta     isRestoreMuteSav
-                sta     drawLevVlVar+1
+                sta     levelTenthDigit
                 sta     generalCounter
                 sta     isGaveBonusLife
                 ldx     #$04
@@ -358,7 +341,7 @@ InitLIFE_loop   sta     Bonus,x
                 lda     #$ff
                 rts
 
-init0A9B        lda     #$00
+initCommon      lda     #$00
                 sta     s3BoxFaceDirection?
                 sta     isRestoreMuteSav
                 sta     isJump
@@ -377,7 +360,7 @@ init0A9B        lda     #$00
                 sta     tnt
                 sta     S2IncineratorVar2
                 sta     isS3SpikeInit
-                sta     s2UpdClamper222
+                sta     s2UpdClamperNone0SkipTo2
                 sta     JackHammerFlag
                 sta     liftPoleVar
                 sta     gotAirHammer
@@ -415,11 +398,11 @@ init0A9B        lda     #$00
                 sta     s3vPlayerBeltVar
                 sta     Vars3TestDropBox
                 sta     lifeRelated
-                sta     vSmall
+                sta     If0initBonusTune
                 sta     s3RivetToPotPoint
                 sta     s2s3JumpFlag+1
                 lda     #$01
-                sta     S2PressVar1
+                sta     S2PressDirection0Up
                 sta     tntErase+2
                 sta     spinMackWait
                 sta     S2LiftWait
@@ -430,23 +413,23 @@ init0A9B        lda     #$00
                 sta     Bonus+3           ;store initial bonus, thousand digit e.g 5000
                 lda     #$0f
                 sta     YcheckAt15Or24
-                lda     #$7d
+                lda     #>jumpPadSprite
                 sta     savedSrcP2+1
-                lda     #$80
+                lda     #<jumpPadSprite
                 sta     savedSrcP2
                 lda     #$70
-                sta     LIFE-1
+                sta     aboutTofallVarSub2
                 lda     #$bc
                 sta     onLF0
                 lda     #$b4
                 sta     liftY?
                 jsr     HGRdo
-                lda     #$1a
+                lda     #>MackWalkTune
                 sta     SndPtr+1
-                sta     SNDPtrToX+1
-                lda     #$f4
+                sta     SNDMackTunePtr+1
+                lda     #<MackWalkTune
                 sta     SndPtr
-                sta     SNDPtrToX
+                sta     SNDMackTunePtr
                 rts
 
 HGRdo           lda     #$20
@@ -1107,7 +1090,7 @@ tblS1BaseStandX .dd1    $06
                 .dd1    $14
                 .dd1    $1c
 
-s3DrawBoard     jsr     init0A9B
+s3DrawBoard     jsr     initCommon
                 lda     #$01              ;orange blue type
                 sta     RailTypeIdx
                 sta     StagePlay         ;stage 3 is 1
@@ -1174,7 +1157,7 @@ s3DrawBoard     jsr     init0A9B
                 lda     tEy,x
                 sta     TblEnmYPtrHi,y
                 sta     enmYptr+1
-                lda     tEUnknpwn,y
+                lda     tblFives,y
                 sta     IdxToEnmXPtr,y
                 sta     timer1
                 sty     indexVar
@@ -1198,9 +1181,9 @@ s3DrawBoard     jsr     init0A9B
                 lda     #$03
                 sta     s3BoxFaceDirection?
                 lda     #$36
-                sta     S2PressVar4
+                sta     S2PressCmpY
                 lda     #$46
-                sta     S2PressV6
+                sta     S2PressCmpLowerY
                 lda     #$07
                 sta     S2Presser_XByte
                 lda     #$36
@@ -1210,12 +1193,12 @@ s3DrawBoard     jsr     init0A9B
                 lda     #$30
                 sta     S2Presser_XByte+3
                 jsr     PutPresser
-                jsr     s3SetVar
+                jsr     s3InitMackTune
                 jsr     encryptJmp
                 sta     selfModAboutToFail+1
                 rts
 
-s2PutInitialObj jsr     init0A9B
+s2PutInitialObj jsr     initCommon
                 lda     #$03
                 sta     StagePlay         ;stage 2 is 3
                 lda     #$00              ;put green type rail
@@ -1260,7 +1243,7 @@ s2PutInitialObj jsr     init0A9B
                 sta     IdxcmpIdxToEnmXPtr?
                 jsr     callShiftBytes
                 ldy     IdxcmpIdxToEnmXPtr?
-@_1             lda     L4D6D,y
+@_1             lda     tblTwos,y
                 sta     tblCmpIdxToEnmXPtr?,y
                 tya
                 asl     A
@@ -1278,7 +1261,7 @@ s2PutInitialObj jsr     init0A9B
                 lda     Tbl_TblEnmYPtrHi,x
                 sta     TblEnmYPtrHi,y
                 sta     enmYptr+1
-                lda     L4D61,y
+                lda     tbl1000,y
                 sta     IdxToEnmXPtr,y
                 sta     timer1
                 sty     indexVar
@@ -1303,9 +1286,9 @@ s2PutInitialObj jsr     init0A9B
                 sta     s3BoxFaceDirection?
                 sta     XRegSave1
                 lda     #$76
-                sta     S2PressVar4
+                sta     S2PressCmpY
                 lda     #$86
-                sta     S2PressV6
+                sta     S2PressCmpLowerY
                 lda     #$1e
                 sta     S2Presser_XByte
                 lda     #$d7
@@ -1315,12 +1298,12 @@ s2PutInitialObj jsr     init0A9B
                 lda     #$70
                 sta     S2Presser_XByte+3
                 jsr     PutPresser
-                jsr     s3SetVar
+                jsr     s3InitMackTune
                 jsr     encryptJmp
                 sta     routine6+1        ;really self mode?
                 rts
 
-drawS1InitObj   jsr     init0A9B
+drawS1InitObj   jsr     initCommon
                 lda     #2
                 sta     StagePlay         ;stage 1 is 2
                 jsr     XORst1Floor
@@ -1395,9 +1378,9 @@ drawS1InitObj   jsr     init0A9B
                 sta     s3BoxFaceDirection?
                 lda     #$02
                 sta     PadIdx
-                jsr     S1InitStuff
+                jsr     S1InitMackTune
                 jsr     encryptJmp        ;after drawn static thing, go $7431
-                sta     setF0             ;will skip?
+                sta     set0s2s3JumpFlag  ;will skip?
                 rts
 
 drawS13Ground   lda     #$80
@@ -1770,7 +1753,11 @@ RivetShapeTable .dd1    $00               ;draw sequence of the nail like Apple 
                 .dd1    $04
                 .dd1    $0f               ;unknown condition, exit
 
-drawNail        ldy     #$00
+********************************************************************************
+* Almost Apple Style Shape Table Render, each byte represent movement and draw *
+* command                                                                      *
+********************************************************************************
+drawShapeTable  ldy     #$00
                 sty     timer1
 drawNailLoop    ldy     timer1
                 lda     (SrcP),y          ;draw a dot if zero
@@ -1918,7 +1905,7 @@ s1DrawNailClock dec     NailWaitBeforeUpdate
                 sta     SrcP+1
                 lda     #$90
                 sta     SrcP
-                jsr     drawNail
+                jsr     drawShapeTable
                 lda     #$26
                 sta     XLocDiv7
                 clc
@@ -1954,7 +1941,7 @@ s1DrawNailClock dec     NailWaitBeforeUpdate
                 sta     SrcP+1
                 lda     #<RivetShapeTable
                 sta     SrcP
-                jsr     drawNail
+                jsr     drawShapeTable
                 lda     rivetX
                 sta     XLocDiv7
                 lda     rivetY
@@ -1965,7 +1952,7 @@ s1DrawNailClock dec     NailWaitBeforeUpdate
                 sta     SrcP+1
                 lda     #<RivetShapeTable
                 sta     SrcP
-                jsr     drawNail
+                jsr     drawShapeTable
                 inc     rivetAddB
                 lda     rivetAddB
                 ldy     s1rivetStepY
@@ -2015,7 +2002,7 @@ s1DrawNailClock dec     NailWaitBeforeUpdate
                 sta     SrcP+1
                 lda     #$90
                 sta     SrcP
-                jsr     drawNail
+                jsr     drawShapeTable
                 lda     #$00
                 sta     s1rivetVarLfdc
                 sta     rivetX
@@ -2293,7 +2280,7 @@ PrtLIFE         lda     LIFE
 L1A3D           .dd1    $b0
                 .dd1    $00
 
-L1A3F           sta     SrcP+1
+CallXorPreshift sta     SrcP+1
                 stx     XLocDiv7
                 stx     XLocation
                 sty     YLoc
@@ -2371,30 +2358,30 @@ s3drawSpike3    clc
 
 setMackMusic    lda     ZeroIfStandStill
                 bne     @_1               ;Mack Moved, so go down
-                lda     #$5e
-                sta     SNDPtrToX+1
-                lda     #$df
-                sta     SNDPtrToX
+                lda     #>WhatTune
+                sta     SNDMackTunePtr+1
+                lda     #<WhatTune
+                sta     SNDMackTunePtr
                 rts
 
-@_1             lda     #$1a
-                sta     SNDPtrToX+1
-                lda     #$f4
-                sta     SNDPtrToX
+@_1             lda     #>MackWalkTune
+                sta     SNDMackTunePtr+1
+                lda     #<MackWalkTune
+                sta     SNDMackTunePtr
                 rts
 
-                .dd1    $08
-v1af5           .dd1    $02
+MackWalkTune    .dd1    $08
+MackWalkTuneMod1 .dd1   $02
                 .dd1    $ff
                 .dd1    $01
                 .dd1    $08
-v1af9           .dd1    $02
+MackWalkTuneMod2 .dd1   $02
                 .dd1    $ff
-                .dd1    $02
+MackWalkTuneMod3 .dd1   $02
                 .dd1    $01
-a1afd           .dd1    $03
+MackWalkTuneMod4 .dd1   $03
                 .dd1    $ff
-a1aff           .dd1    $02
+MackWalkTuneMod5 .dd1   $02
                 .dd1    $00
                 .dd1    $00
                 .dd1    $00
@@ -2406,7 +2393,7 @@ JumpMusic       .dd1    $00
                 .dd1    $06
                 .dd1    $02
                 .dd1    $08
-a10b            .dd1    $02
+JumpMusicMod1   .dd1    $02
                 .dd1    $08
                 .dd1    $02
                 .dd1    $06
@@ -3578,24 +3565,24 @@ drawEAlogo      lda     #$00
                 jsr     BitBlt1
                 rts
 
-S1InitStuff     lda     #$02
-                sta     v1af5
-                sta     v1af9
-                sta     v1af9+2
-                sta     a10b
-                sta     a1aff
+S1InitMackTune  lda     #$02
+                sta     MackWalkTuneMod1
+                sta     MackWalkTuneMod2
+                sta     MackWalkTuneMod3
+                sta     JumpMusicMod1
+                sta     MackWalkTuneMod5
                 lda     #$03
-                sta     a1afd
+                sta     MackWalkTuneMod4
                 rts
 
-s3SetVar        lda     #$01
-                sta     v1af5
-                sta     v1af9
-                sta     v1af9+2
-                sta     a10b
-                sta     a1aff
+s3InitMackTune  lda     #$01
+                sta     MackWalkTuneMod1
+                sta     MackWalkTuneMod2
+                sta     MackWalkTuneMod3
+                sta     JumpMusicMod1
+                sta     MackWalkTuneMod5
                 lda     #$02
-                sta     a1afd
+                sta     MackWalkTuneMod4
                 rts
 
 TBLChainXdiv7   .dd1    $1c
@@ -3984,10 +3971,10 @@ s2drawDumpPot   lda     #$0c
                 jsr     BitBlt1
                 rts
 
-PutPresser      lda     S2PressVar4
+PutPresser      lda     S2PressCmpY
                 sta     YLoc
-                sta     S2Pv8
-                sta     S2PressV5
+                sta     S2ToYLocation
+                sta     S2PressYY?
                 sec
                 sbc     #$10
                 sta     Ycount
@@ -4629,7 +4616,7 @@ tblCmpIdxToEnmXPtr? .dd1 $00
                 .dd1    $00
                 .dd1    $00
                 .dd1    $00
-tEUnknpwn       .dd1    $05
+tblFives        .dd1    $05
                 .dd1    $05
                 .dd1    $05
                 .dd1    $05
@@ -4637,7 +4624,7 @@ TBLIdxToEnmXPtr .dd1    $02
                 .dd1    $04
                 .dd1    $09
                 .dd1    $0a
-L4D61           .dd1    $01
+tbl1000         .dd1    $01
                 .dd1    $00
                 .dd1    $00
                 .dd1    $00
@@ -4649,7 +4636,7 @@ TblcmpIdxToEnmXPtr? .dd1 $06
                 .dd1    $0b
                 .dd1    $0b
                 .dd1    $0b
-L4D6D           .dd1    $02
+tblTwos         .dd1    $02
                 .dd1    $02
                 .dd1    $02
                 .dd1    $02
@@ -4881,16 +4868,10 @@ xpoint6         .dd1    $00
 xpoint7         .dd1    $00
 ypoint          .dd1    $00
 S1beamX         .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
+                .junk   4
+aboutTofallVarSub2 .dd1 $00
 LIFE            .dd1    $02
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
+                .junk   4
 PlayerS3AboutToFallVar .dd1 $00
 
 s1_fall_into_Hole lda   isJump
@@ -4993,21 +4974,21 @@ aboutToFall_2   lda     #$a4
 @_2             sta     YLoc
                 sta     PlayerY
                 jsr     XorPreshiftShape  ;draw fall down to death mack (no collapse)
-                lda     #$a4
+                lda     #>mackFrontSprite
                 sta     SrcP+1
                 sta     Src_Erase+1
-                lda     LIFE-1
+                lda     aboutTofallVarSub2
                 sec
                 sbc     #$02
                 cmp     #$30
-                bcc     @_3
-                sta     LIFE-1
+                bcc     @_3               ;less than 0x30
+                sta     aboutTofallVarSub2
 @_3             jsr     MON_WAIT
                 jmp     @_1
 
 @_4             lda     PlayerSaveWhat
                 sta     PlayerY
-                lda     #$a4
+                lda     #>mackFrontSprite
                 sta     PreshiftAddrHi
                 lda     PlayerS3AboutToFallVar
                 beq     collapseMack_1
@@ -5015,12 +4996,12 @@ aboutToFall_2   lda     #$a4
 
 collapseMack_1  lda     PreshiftAddrHi
                 sta     Src_Erase+1
-                lda     #$bc
+                lda     #>flattenMackPreshift
                 sta     SrcP+1
                 jsr     drawCollapseMack
-                lda     #$bc
+                lda     #>flattenMackPreshift
                 sta     Src_Erase+1
-                lda     #$be
+                lda     #>flattenMack2Preshift
                 sta     SrcP+1
                 jsr     drawCollapseMack
                 jmp     DecLIFE
@@ -5039,31 +5020,31 @@ setMackDrown    lda     #>mackDrown1      ;point to toolbox bitmap
                 bne     @_1
                 jmp     DecLIFE
 
-@_1             lda     #$8a
+@_1             lda     #>spillWater1
                 sta     SrcP+1
-                lda     #$20
+                lda     #<spillWater1
                 sta     SrcP
                 jsr     drawPlayerDrown
-                lda     #$8a
+                lda     #>spillWater2
                 sta     SrcP+1
-                lda     #$40
+                lda     #<spillWater2
                 sta     SrcP
                 jsr     drawPlayerDrown
-                lda     #$8a
+                lda     #>spillWater3
                 sta     SrcP+1
-                lda     #$60
+                lda     #<spillWater3
                 sta     SrcP
                 jsr     drawPlayerDrown
                 lda     #$30
                 jsr     MON_WAIT
-                lda     #$8a
+                lda     #>spillWater2
                 sta     SrcP+1
-                lda     #$40
+                lda     #<spillWater2
                 sta     SrcP
                 jsr     drawPlayerDrown
-                lda     #$8a
+                lda     #>spillWater1
                 sta     SrcP+1
-                lda     #$20
+                lda     #<spillWater1
                 sta     SrcP
                 jsr     drawPlayerDrown
                 jmp     DecLIFE
@@ -5382,7 +5363,7 @@ tblS3BoxX       .dd1    $00
                 .dd1    $67
                 .dd1    $27
                 .dd1    $67
-                .dd1    $46
+tbl57b7         .dd1    $46
                 .dd1    $2a
                 .dd1    $b6
                 .dd1    $0e
@@ -5410,13 +5391,13 @@ s3PutPickitem   lda     s3PutPickitem-1
                 sta     ptrBoxY
                 jmp     @_2
 
-@_1             lda     #$52              ;OrangeBlock at 0xb752
+@_1             lda     #>tbl57b7         ;OrangeBlock at 0xb752
                 sta     ptrBoxX+1
-                lda     #$b7
+                lda     #<tbl57b7
                 sta     ptrBoxX
-                lda     #$52              ;bd52 flattenMack?
+                lda     #>tblS3BoxY       ;bd52 flattenMack?
                 sta     ptrBoxY+1
-                lda     #$bd
+                lda     #<tblS3BoxY
                 sta     ptrBoxY
 @_2             ldy     S3PickBoxIndex
                 sty     timer1
@@ -5559,7 +5540,7 @@ segment8        .dd1    $03
                 .dd1    $02
                 .dd1    $0f
                 .dd1    $00
-s3TblBelt       .dd1    $00
+s3TblBeltSegment .dd1   $00
                 .dd1    $00
                 .dd1    $00
                 .dd1    $00
@@ -5575,7 +5556,7 @@ fourItem        .dd1    $00
                 .dd1    $00
                 .dd1    $00
 s3BeltIdxDown   .dd1    $00
-s3v4            .dd1    $00
+s3add16tobeTblBelt .dd1 $00
 s3BeltMoveWaitCounter .dd1 $01
 s3TblPickSegment .dd1   $03
                 .dd1    $03
@@ -5683,12 +5664,12 @@ S3MoveTallBelt  lda     #$02
                 ldy     #$04
                 sty     s3BeltIdxDown
                 lda     #$00
-                sta     s3v4
-@loop           sta     s3TblBelt,y
+                sta     s3add16tobeTblBelt
+@loop           sta     s3TblBeltSegment,y
                 clc
                 adc     #$10
-                sta     s3v4
-                lda     s3TblBelt,y
+                sta     s3add16tobeTblBelt
+                lda     s3TblBeltSegment,y
                 tax
                 lda     tblS3BeltXLocDiv7,x
                 sta     XLocDiv7
@@ -5702,8 +5683,8 @@ S3MoveTallBelt  lda     #$02
                 inx
                 lda     Tbls3BeltShapeTable,x
                 sta     SrcP+1
-                jsr     drawNail
-                lda     s3v4
+                jsr     drawShapeTable
+                lda     s3add16tobeTblBelt
                 dec     s3BeltIdxDown
                 ldy     s3BeltIdxDown
                 bpl     @loop
@@ -5711,7 +5692,7 @@ S3MoveTallBelt  lda     #$02
 
 @_2             ldy     #$04
                 sty     s3BeltIdxDown
-@_3             lda     s3TblBelt,y
+@_3             lda     s3TblBeltSegment,y
                 tax
                 lda     tblS3BeltXLocDiv7,x
                 sta     XLocDiv7
@@ -5727,7 +5708,7 @@ S3MoveTallBelt  lda     #$02
                 inx
                 lda     Tbls3BeltShapeTable,x
                 sta     SrcP+1
-                jsr     drawNail
+                jsr     drawShapeTable
                 ldy     s3BeltIdxDown
                 jsr     S3drawBeltSegment
                 dec     s3BeltIdxDown
@@ -5736,12 +5717,12 @@ S3MoveTallBelt  lda     #$02
                 rts
 
 S3drawBeltSegment clc
-                lda     s3TblBelt,y
+                lda     s3TblBeltSegment,y
                 adc     #$01
                 cmp     #$52
                 bne     @_1
                 lda     #$00
-@_1             sta     s3TblBelt,y
+@_1             sta     s3TblBeltSegment,y
                 tax
                 lda     tblS3BeltXLocDiv7,x
                 sta     XLocDiv7
@@ -5755,7 +5736,7 @@ S3drawBeltSegment clc
                 inx
                 lda     Tbls3BeltShapeTable,x
                 sta     SrcP+1
-                jsr     drawNail
+                jsr     drawShapeTable
                 rts
 
 s2TestToolboxTaken ldy  #$05
@@ -6048,10 +6029,10 @@ tblBONUSXX      .dd1    $00
                 .dd1    $01
                 .dd1    $00
                 .dd1    $00
-unknorR         .dd1    $00
+addBonusVar     .dd1    $00
 vFlagCountBon   .dd1    $00
 vDoneFlag       .dd1    $00
-vSmall          .dd1    $00
+If0initBonusTune .dd1   $00
 tblBonus        .dd1    $05
                 .dd1    $04
 Bonus           .dd1    $00               ;5 digit in reverse. e.g 00050  is Bonus 05000
@@ -6128,14 +6109,14 @@ outChar         .dd1    $30
 BonusCompare    ldx     #$04
 @_1             lda     Bonus,x
                 clc
-                adc     unknorR
-                sta     unknorR
+                adc     addBonusVar
+                sta     addBonusVar
                 dex
                 bpl     @_1
-                lda     unknorR
+                lda     addBonusVar
                 beq     @_6
                 lda     #$00
-                sta     unknorR
+                sta     addBonusVar
                 ldx     #$04
 @_2             lda     tblBONUSXX,x
                 cmp     Bonus,x
@@ -6145,7 +6126,7 @@ BonusCompare    ldx     #$04
                 bpl     @_2
 @_3             rts
 
-@_4             lda     vSmall
+@_4             lda     If0initBonusTune
                 beq     @_5
                 rts
 
@@ -6153,7 +6134,7 @@ BonusCompare    ldx     #$04
                 ldx     #<bonusTune
                 jsr     InitTune
                 lda     #$01
-                sta     vSmall
+                sta     If0initBonusTune
                 jsr     InitTune
                 rts
 
@@ -6368,19 +6349,19 @@ s2CheckRIghtPressor lda PlayerY
                 bcs     @_2
                 rts
 
-@_2             lda     S2PressV5
+@_2             lda     S2PressYY?
                 sec
                 sbc     #$08
                 cmp     timer1
                 bcc     @_3
                 rts
 
-@_3             lda     S2PressV5
+@_3             lda     S2PressYY?
                 cmp     timer1
                 bcs     @_4
                 rts
 
-@_4             lda     S2PressVar3
+@_4             lda     S2PresserWait
                 bne     @_5
                 jsr     s2updPresser
                 jsr     doSound
@@ -6569,7 +6550,7 @@ collideNail     lda     isPlayerOver219
 
 AirHammerV2     .dd1    $00
 
-tstEhammer      lda     AirHammerV2
+tstHammer       lda     AirHammerV2
                 beq     @_1
                 rts
 
@@ -6811,8 +6792,8 @@ Joy_State       .dd1    $00
                 .dd1    $00
 SNDPtrSav       .dd1    $00
 SNDskipSetup    .dd1    $00
-readOnce        .dd1    $04
-SNDPtrToX       .dd1    $00
+SNDconst4       .dd1    $04
+SNDMackTunePtr  .dd1    $00
                 .dd1    $00
 SNDskipTo3      .dd1    $00
 
@@ -6825,7 +6806,7 @@ InitTune        lda     SNDskipSetup
 @no_init        stx     SndPtr
                 sty     SndPtr+1
                 lda     #$00
-                sta     SNDskip?
+                sta     SNDbneLoop4
                 rts
 
 snd1            lda     SNDskipSetup
@@ -6835,16 +6816,16 @@ snd1            lda     SNDskipSetup
                 lda     SNDskipSetup
                 sta     SndPtr+1
                 lda     #$00
-                sta     SNDskip?
+                sta     SNDbneLoop4
                 sta     SNDskipSetup
                 rts
 
-@_1             lda     SNDPtrToX
+@_1             lda     SNDMackTunePtr
                 sta     SndPtr
-                lda     SNDPtrToX+1
+                lda     SNDMackTunePtr+1
                 sta     SndPtr+1
                 lda     #$00
-                sta     SNDskip?
+                sta     SNDbneLoop4
                 sta     SNDskipSetup
                 rts
 
@@ -6852,7 +6833,7 @@ doSound         lda     isMute
                 beq     sound2
                 rts
 
-sound2          lda     SNDskip?
+sound2          lda     SNDbneLoop4
                 bne     soundLoop4
                 ldy     #$00
                 lda     (SndPtr),y
@@ -6875,7 +6856,7 @@ sound2          lda     SNDskip?
 sound3          iny
                 lda     (SndPtr),y
                 beq     snd1
-                sta     SNDskip?
+                sta     SNDbneLoop4
                 lda     SndPtr
                 clc
                 adc     #$02
@@ -6902,26 +6883,26 @@ soundLoop4      lda     SNDfromTbl        ;update Pointer..
                 eor     #$01
                 tax
                 lda     SNDClickList,x
-                bne     @noCLicking
+                bne     @Sound5noCLicking
                 inc     SNDClickList,x
                 bit     SPKR
                 jmp     sound6
 
-@noCLicking     bit     KBD
+@Sound5noCLicking bit   KBD
                 inc     SNDdummyWasteCycle
                 nop
-sound6          lda     readOnce
+sound6          lda     SNDconst4
                 clc
-                adc     SND35
-                sta     SND35
+                adc     SNDadd4Var
+                sta     SNDadd4Var
                 lda     SNDclickCarry
                 adc     #$00
                 sta     SNDclickCarry
-                dec     SND32
+                dec     SNDloop120
                 bne     soundLoop4
-                lda     #$78
-                sta     SND32
-                dec     SNDskip?
+                lda     #120
+                sta     SNDloop120
+                dec     SNDbneLoop4
                 rts
 
 SNDtbl1         .dd1    $00
@@ -7034,7 +7015,7 @@ bonusTune       .dd1    $08
                 .dd1    $03
                 .dd1    $00
                 .dd1    $00
-                .dd1    $ff
+WhatTune        .dd1    $ff
                 .dd1    $20
                 .dd1    $00
                 .dd1    $00
@@ -7398,7 +7379,7 @@ testPlayerXNearBelt lda S2Thing
                 bcc     @_8
                 jmp     @_6
 
-@_8             lda     s3TblBelt,x       ;match belt segment
+@_8             lda     s3TblBeltSegment,x ;match belt segment
                 sta     s3vPlayerBeltVar
                 lda     isJump
                 beq     @_9
@@ -7675,7 +7656,7 @@ s3UptRivetToPot lda     s3RivetToPotPoint
                 sta     SrcP+1
                 lda     #$90
                 sta     SrcP
-                jsr     drawNail
+                jsr     drawShapeTable
                 rts
 
 s1UnusedLIFT    .dd1    $00
@@ -7780,7 +7761,7 @@ S1collapseMackIdx .dd1  $00
 s1Wait5         .dd1    $00
 s1Wait3Frame    .dd1    $01
 
-s1_collpasMack? lda     collpasMackVar
+s1_collapsingMack? lda  collpasMackVar
                 bne     @_1
                 rts
 
@@ -8128,26 +8109,26 @@ testPlayerSomething lda S23NonZeroCheck?
                 jmp     s2IsBelRoutine
 
 @_3             cmp     #$85
-                bcc     setF1
+                bcc     set1s2s3JumpFlag
                 jmp     @_1
 
-setF0           lda     #$00
+set0s2s3JumpFlag lda    #$00
                 sta     s2s3JumpFlag
                 rts
 
-setF1           lda     #$01
+set1s2s3JumpFlag lda    #$01
                 sta     s2s3JumpFlag
                 rts
 
 s2IsBelRoutine  lda     s3BoxFaceDirection?
                 cmp     #$03
-                beq     setF0
-                jmp     setF1
+                beq     set0s2s3JumpFlag
+                jmp     set1s2s3JumpFlag
 
 @_1             lda     s3BoxFaceDirection?
                 cmp     #$01
-                beq     setF0
-                jmp     setF1
+                beq     set0s2s3JumpFlag
+                jmp     set1s2s3JumpFlag
 
 removeMackOnBelt lda    s3BoxFaceDirection?
                 cmp     #$01
@@ -8759,9 +8740,9 @@ s2UpdClampervvv .dd1    $1c
 s2ClamperY      .dd1    $85
                 .dd1    $00
                 .dd1    $00
-s2UpdClamper222 .dd1    $00
-s2UpdClamper111 .dd1    $00
-s2UpdClamperSrcP .dd1   $ad
+s2UpdClamperNone0SkipTo2 .dd1 $00
+s2UpdClamperIdxY .dd1   $00
+s2UpdClamperShapeTableSrcP .dd1 $ad
                 .dd1    $6b
                 .dd1    $c5
                 .dd1    $6b
@@ -8820,10 +8801,10 @@ s2UpdClamper    dec     tblClamper2-1
 
 @_1             lda     #$02
                 sta     tblClamper2-1
-                lda     s2UpdClamper222
+                lda     s2UpdClamperNone0SkipTo2
                 bne     @_2
                 lda     #$01
-                sta     s2UpdClamper222
+                sta     s2UpdClamperNone0SkipTo2
                 ldy     #$01
                 lda     #$38
                 sta     tblClamper2,y
@@ -8849,19 +8830,19 @@ s2UpdClamper    dec     tblClamper2-1
                 rts
 
 @_2             ldy     #$01
-                sty     s2UpdClamper111
+                sty     s2UpdClamperIdxY
 @_3             lda     tblClamperX,y
                 sta     XLocDiv7
                 lda     s2ClamperY
                 sta     YLoc
                 jsr     @_9
-                ldy     s2UpdClamper111
+                ldy     s2UpdClamperIdxY
                 lda     tblClamper2,y
                 sta     XLocDiv7
                 lda     s2ClamperY
                 sta     YLoc
                 jsr     @_9
-                ldx     s2UpdClamper111
+                ldx     s2UpdClamperIdxY
                 lda     tblClamper2,x
                 sta     tblClamperX,x
                 lda     s2ClamperY+1,x
@@ -8880,20 +8861,20 @@ s2UpdClamper    dec     tblClamper2-1
 @_7             lda     s2ClamperY+1,x
                 eor     #$01
                 sta     s2ClamperY+1,x
-@_8             dec     s2UpdClamper111
-                ldy     s2UpdClamper111
+@_8             dec     s2UpdClamperIdxY
+                ldy     s2UpdClamperIdxY
                 bpl     @_3
                 rts
 
 @_9             tya
                 asl     A
                 tay
-                lda     s2UpdClamperSrcP,y
+                lda     s2UpdClamperShapeTableSrcP,y
                 sta     SrcP
                 iny
-                lda     s2UpdClamperSrcP,y
+                lda     s2UpdClamperShapeTableSrcP,y
                 sta     SrcP+1
-                jsr     drawNail
+                jsr     drawShapeTable
                 rts
 
 S2_SpinRollerEraae .dd1 $00
@@ -9223,47 +9204,47 @@ s3AnimeINpoint  dec     s3Cnt6ef1
                 rts
 
                 .junk   211
-drawLevVlVar    .dd1    $03
-                .dd1    $00
+levelSingleDigit .dd1   $03
+levelTenthDigit .dd1    $00
 
-drawLevelDigit  inc     drawLevVlVar
-                lda     drawLevVlVar
-                cmp     #$0a
+drawLevelDigit  inc     levelSingleDigit
+                lda     levelSingleDigit
+                cmp     #10
                 bcc     @_1
                 lda     #$00
-                sta     drawLevVlVar
-                inc     drawLevVlVar+1
-                lda     drawLevVlVar+1
-                cmp     #$0a
+                sta     levelSingleDigit
+                inc     levelTenthDigit
+                lda     levelTenthDigit
+                cmp     #10
                 bcc     drawLevelTenthDigit
                 lda     #$00
-                sta     drawLevVlVar+1
+                sta     levelTenthDigit
 drawLevelTenthDigit lda #$26
                 sta     XLocDiv7
-                lda     #$70
+                lda     #112
                 sta     YLoc
-                ldy     drawLevVlVar+1
+                ldy     levelTenthDigit
                 jsr     @_2
 @_1             lda     #$27
                 sta     XLocDiv7
-                lda     #$70
+                lda     #112
                 sta     YLoc
-                ldy     drawLevVlVar
+                ldy     levelSingleDigit
 @_2             tya
                 ora     #$30
-                sta     TenthDigitYChar
+                sta     DigitChar
                 lda     XLocDiv7
-                sta     TenthDigitX
+                sta     DigitX
                 lda     YLoc
-                sta     TenthDigitY
+                sta     DigitY
                 lda     #$70
                 ldx     #$50
                 jmp     PrintNumChar
 
-TenthDigitX     .dd1    $00
-TenthDigitY     .dd1    $00
-TenthDigitYChar .dd1    $30
-                .dd1    $00
+DigitX          .dd1    $00
+DigitY          .dd1    $00
+DigitChar       .dd1    $30
+                .junk   1
 
 IndirectDrawTitle jsr   HGRdo
                 lda     #$19
@@ -9287,18 +9268,18 @@ IndirectDrawTitle jsr   HGRdo
                 lda     #$90
                 sta     YLoc
                 jsr     drawLeftPlatform
-                ldx     #$8a
+                ldx     #$8a              ;draw all characters on title page
                 ldy     #$88
-                lda     #$94
-                jsr     L1A3F
+                lda     #>macWalkRightSprite
+                jsr     CallXorPreshift
                 ldx     #$28
                 ldy     #$88
-                lda     #$a8
-                jsr     L1A3F
+                lda     #>VANDAL
+                jsr     CallXorPreshift
                 ldx     #$e8
                 ldy     #$88
-                lda     #$ac
-                jsr     L1A3F
+                lda     #>OSHA
+                jsr     CallXorPreshift
                 jsr     drawEAlogo
                 jsr     TitleWait?
                 jsr     encryptJmp
@@ -9536,7 +9517,7 @@ setInGameLoop   lda     #$01
                 lda     indStageJump+1,y
                 sta     XLocDiv7Ptr+1
                 lda     TblsetInGameLoop,y
-                sta     drawLevVlVar
+                sta     levelSingleDigit
                 jmp     (XLocDiv7Ptr)
 
 checkStart      lda     isInGameLoop
@@ -10105,11 +10086,11 @@ s3RollerSrcSave2 .dd1   $00
 s3RollerSrcSave1 .dd1   $00
                 .dd1    $00
 s3RollerAnimeFrame .dd1 $00
-vs3AnimeTallRoller16 .dd1 $00
+tblS3AnimeFrameOffset .dd1 $00
                 .dd1    $20
                 .dd1    $40
                 .dd1    $60
-vs3AnimeTallRoller17 .dd1 $4c
+tblS3TallRollerY .dd1   $4c
                 .dd1    $96
 s3BigRollWait   .dd1    $02
 
@@ -10132,7 +10113,7 @@ s3AnimeTallRollingPoint dec s3BigRollWait
                 lda     #$11
                 sta     XLocDiv7
                 sta     XLocation
-                lda     vs3AnimeTallRoller17,y
+                lda     tblS3TallRollerY,y
                 sta     YLoc
                 sta     YLocation
                 jsr     BltBytes
@@ -10146,13 +10127,13 @@ s3AnimeTallRollingPoint dec s3BigRollWait
                 inc     s3RollerAnimeFrame
                 lda     s3RollerAnimeFrame
                 cmp     #$04
-                bne     L76B0
+                bne     @_3
                 lda     #$00
                 sta     s3RollerAnimeFrame
-L76B0           tay
+@_3             tay
                 clc
                 lda     #<s3BigRoll
-                adc     vs3AnimeTallRoller16,y
+                adc     tblS3AnimeFrameOffset,y
                 sta     s3RollerSrcSave2
                 lda     #>s3BigRoll
                 adc     #$00
@@ -10374,62 +10355,62 @@ doSt2DropToPot  ldy     #$01
                 jsr     XorPreshiftShape
                 rts
 
-S2PressV5       .dd1    $00
-S2Pv8           .dd1    $00
-S2PressVar1     .dd1    $00
+S2PressYY?      .dd1    $00
+S2ToYLocation   .dd1    $00
+S2PressDirection0Up .dd1 $00
+S2ToYLocBackup? .dd1    $00
+S2PressY2       .dd1    $00
+S2PresserWait   .dd1    $01
+S2Const6        .dd1    $06
                 .dd1    $00
-S2PressVar2     .dd1    $00
-S2PressVar3     .dd1    $01
-                .dd1    $06
-                .dd1    $00
-S2PressVar4     .dd1    $00
-S2PressV6       .dd1    $00
+S2PressCmpY     .dd1    $00               ;0x36 or 0x76 depends on S2 or S3 which is which
+S2PressCmpLowerY .dd1   $00
 S2Presser_XByte .dd1    $00
                 .dd1    $00
                 .dd1    $00
                 .dd1    $00
 
-s2updPresser    lda     S2PressVar3
+s2updPresser    lda     S2PresserWait
                 beq     @_1
-                dec     S2PressVar3
+                dec     S2PresserWait
                 rts
 
-@_1             lda     S2PressVar1
-                beq     @_2
-                lda     S2PressV5
-                sta     S2Pv8
-                sta     S2PressVar1+1
+@_1             lda     S2PressDirection0Up
+                beq     @_GoUp
+@DummyLabelGoDown lda   S2PressYY?
+                sta     S2ToYLocation
+                sta     S2ToYLocBackup?
                 clc
                 adc     #$04
-                sta     S2PressV5
-                sta     S2PressVar2
+                sta     S2PressYY?
+                sta     S2PressY2
                 jmp     @_3
 
-@_2             lda     S2PressV5
-                sta     S2Pv8
-                sta     S2PressVar1+1
+@_GoUp          lda     S2PressYY?
+                sta     S2ToYLocation
+                sta     S2ToYLocBackup?
                 sec
                 sbc     #$04
-                sta     S2PressV5
-                sta     S2PressVar2
+                sta     S2PressYY?
+                sta     S2PressY2
 @_3             jsr     doSt2Press
                 jsr     pressTHing2
-                lda     S2PressVar1
+                lda     S2PressDirection0Up
                 bne     @_4
-                lda     S2PressV5
-                cmp     S2PressVar4
+                lda     S2PressYY?
+                cmp     S2PressCmpY
                 bne     @_exit
                 lda     #$01
-                sta     S2PressVar1
+                sta     S2PressDirection0Up
                 lda     #$10
-                sta     S2PressVar3
+                sta     S2PresserWait
                 rts
 
-@_4             lda     S2PressV5
-                cmp     S2PressV6
-                bne     @_exit
-                lda     #$00
-                sta     S2PressVar1
+@_4             lda     S2PressYY?        ;is Presser down enough?
+                cmp     S2PressCmpLowerY  ;46 or 76
+                bne     @_exit            ;nope
+                lda     #$00              ;Presser go up
+                sta     S2PressDirection0Up
                 lda     ZeroIfStandStill
                 bne     @_exit
                 ldy     #>PresserTune
@@ -10440,9 +10421,9 @@ s2updPresser    lda     S2PressVar3
 doSt2Press      lda     S2Presser_XByte
                 sta     XLocDiv7
                 sta     XLocation
-                lda     S2PressV5
+                lda     S2PressYY?
                 sta     YLoc
-                lda     S2Pv8
+                lda     S2ToYLocation
                 sta     YLocation
                 lda     #>s3Stamper
                 sta     SrcP+1
@@ -10458,9 +10439,9 @@ pressTHing2     lda     S2Presser_XByte+3
                 lda     S2Presser_XByte+1
                 sta     StartLineByte
                 sta     EndLineByte
-                lda     S2PressVar1+1
+                lda     S2ToYLocBackup?
                 sec
-                sbc     S2PressVar3+1
+                sbc     S2Const6
                 sta     Ything2
                 jsr     drawGroundLine
                 lda     S2Presser_XByte+3
@@ -10468,9 +10449,9 @@ pressTHing2     lda     S2Presser_XByte+3
                 lda     S2Presser_XByte+1
                 sta     StartLineByte
                 sta     EndLineByte
-                lda     S2PressVar2
+                lda     S2PressY2
                 sec
-                sbc     S2PressVar3+1
+                sbc     S2Const6
                 sta     Ything2
                 jsr     drawGroundLine
                 lda     S2Presser_XByte+3
@@ -10478,9 +10459,9 @@ pressTHing2     lda     S2Presser_XByte+3
                 lda     S2Presser_XByte+2
                 sta     StartLineByte
                 sta     EndLineByte
-                lda     S2PressVar1+1
+                lda     S2ToYLocBackup?
                 sec
-                sbc     S2PressVar3+1
+                sbc     S2Const6
                 sta     Ything2
                 jsr     drawGroundLine
                 lda     S2Presser_XByte+3
@@ -10488,9 +10469,9 @@ pressTHing2     lda     S2Presser_XByte+3
                 lda     S2Presser_XByte+2
                 sta     StartLineByte
                 sta     EndLineByte
-                lda     S2PressVar2
+                lda     S2PressY2
                 sec
-                sbc     S2PressVar3+1
+                sbc     S2Const6
                 sta     Ything2
                 jsr     drawGroundLine
                 rts
@@ -11115,122 +11096,35 @@ s3BigRoll       .dd1    $00
                 .dd1    $07
                 .dd1    $70
 
-S3Storage4x32   .dd1    $ff
-                .dd1    $ff
-                .dd1    $ff
-                .dd1    $ff
-                .dd1    $ea
-                .dd1    $d5
-                .dd1    $aa
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $d5
-                .dd1    $aa
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $ff
-                .dd1    $ff
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $ea
-                .dd1    $d5
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $ea
-                .dd1    $d5
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $ea
-                .dd1    $d5
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $fa
-                .dd1    $d5
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $fa
-                .dd1    $d5
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $ea
-                .dd1    $d5
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $ea
-                .dd1    $dd
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $ea
-                .dd1    $dd
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $ea
-                .dd1    $dd
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $fa
-                .dd1    $d5
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $fa
-                .dd1    $d5
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $ea
-                .dd1    $d5
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $ea
-                .dd1    $d5
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $ff
-                .dd1    $ff
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $d5
-                .dd1    $aa
-                .dd1    $d7
-                .dd1    $ea
-                .dd1    $d5
-                .dd1    $aa
-                .dd1    $d7
-                .dd1    $eb
-                .dd1    $ff
-                .dd1    $ff
-                .dd1    $f7
-                .dd1    $eb
-                .dd1    $92
-                .dd1    $92
-                .dd1    $b7
-                .dd1    $eb
-                .dd1    $92
-                .dd1    $92
-                .dd1    $b7
-                .dd1    $eb
-                .dd1    $ff
-                .dd1    $ff
-                .dd1    $f7
-                .dd1    $eb
-                .dd1    $92
-                .dd1    $92
-                .dd1    $b7
-                .dd1    $eb
-                .dd1    $92
-                .dd1    $92
-                .dd1    $b7
-                .dd1    $eb
-                .dd1    $ff
-                .dd1    $ff
-                .dd1    $f7
-                .dd1    $ea
-                .dd1    $d5
-                .dd1    $aa
-                .dd1    $d7
-                .dd1    $ff
-                .dd1    $ff
-                .dd1    $ff
-                .dd1    $ff
+S3Storage4x32   .bulk   ffffffff
+                .bulk   ead5aad7
+                .bulk   ead5aad7
+                .bulk   eaffffd7
+                .bulk   eaead5d7
+                .bulk   eaead5d7
+                .bulk   eaead5d7
+                .bulk   eafad5d7
+                .bulk   eafad5d7
+                .bulk   eaead5d7
+                .bulk   eaeaddd7
+                .bulk   eaeaddd7
+                .bulk   eaeaddd7
+                .bulk   eafad5d7
+                .bulk   eafad5d7
+                .bulk   eaead5d7
+                .bulk   eaead5d7
+                .bulk   eaffffd7
+                .bulk   ead5aad7
+                .bulk   ead5aad7
+                .bulk   ebfffff7
+                .bulk   eb9292b7
+                .bulk   eb9292b7
+                .bulk   ebfffff7
+                .bulk   eb9292b7
+                .bulk   eb9292b7
+                .bulk   ebfffff7
+                .bulk   ead5aad7
+                .bulk   ffffffff
 
 liftSprite      .bulk   0000000000000000
                 .bulk   0000000000000000
@@ -11363,11 +11257,11 @@ ConveyorRoll2   .bulk   bfaaf7aaf7abf7bef7f0bf8080808080
 
                 .bulk   bfaaefaae7abf3befbf0bf8080808080
 
-                .bulk   0100110013000d08014812300c00000000000000000000000000000000000000
+spillWater1     .bulk   0100110013000d08014812300c00000000000000000000000000000000000000
 
-                .bulk   0100110013000d0801484131410136660c180000000000000000000000000000
+spillWater2     .bulk   0100110013000d0801484131410136660c180000000000000000000000000000
 
-                .bulk   0100010011104102110813494d3001024102410432440c380000000000000000
+spillWater3     .bulk   0100010011104102110813494d3001024102410432440c380000000000000000
 
 S3spike1        .bulk   808180818081828b80a1818188918181808180c1848181a38889818180818081
 
@@ -12166,7 +12060,7 @@ mackFront2Sprite .bulk  000000000000000000003c3c00001c38000016680000052000000660
                  +      001d2e000002500000025000000f7c0000077800000738000003300000000000
                 .junk   64
 
-                .bulk   00003c000000143c0000142800001668000005200000010000004a5200004a52
+VANDAL          .bulk   00003c000000143c0000142800001668000005200000010000004a5200004a52
                  +      00004b520000352c000006600000052000000a50000014280000224400000420
 
                 .bulk   00007800000028780000285000002d5000000a40000002000001152400011524
@@ -12183,7 +12077,7 @@ mackFront2Sprite .bulk  000000000000000000003c3c00001c38000016680000052000000660
                  +      00256900001a5600000330000002500000052800000a14000011220000021000
                 .junk   64
 
-                .bulk   0000003c00003c280000142800001668000005200000410200004a5200006a56
+VANDALx         .bulk   0000003c00003c280000142800001668000005200000410200004a5200006a56
                  +      00001b5800000520000006600000052000001250000014440000252800000a24
                 .bulk   00000078000078500000285000002d5000000a4000010204000115240001552c
                  +      0000373000000a4000000d4000000a40000025200000290800004a5000001448
@@ -12199,7 +12093,7 @@ mackFront2Sprite .bulk  000000000000000000003c3c00001c38000016680000052000000660
                  +      000d6c0000025000000330000002500000092800000a22000012540000051200
                 .junk   64
 
-                .bulk   00000f000000073c000005380000052800000528000005280000065800000658
+OSHA            .bulk   00000f000000073c000005380000052800000528000005280000065800000658
                  +      00000e5c00003f3f000031630000021000000778000006580000077800000250
                 .bulk   00001e0000000e7800000a7000000a5000000a5000000a5000000d3000000d30
                  +      00001d3800007e7e000063460000042000000f7000000d3000000f7000000520
@@ -12363,7 +12257,7 @@ s2MagnetShape   .bulk   00002a5400007f7e00002a5400003f7c00001f780000024000000240
                  +      0001200000012000000120000001200000012000000120000001200000012000
                 .junk   64
 
-                .bulk   0000003c00003c3c00001668000015280000066000000a5000007a5e00000520
+flattenMackPreshift .bulk 0000003c00003c3c00001668000015280000066000000a5000007a5e00000520
                  +      00001f7800000f70000006600000000000000000000000000000000000000000
 
                 .bulk   000000780000787800002d5000002a5000000d40000015200001753c00000a40
@@ -12385,872 +12279,7 @@ s2MagnetShape   .bulk   00002a5400007f7e00002a5400003f7c00001f780000024000000240
                  +      000f7c0000077800000330000000000000000000000000000000000000000000
                 .junk   64
 
-                .bulk   00003c3c000016680000066000003a5c0000052000001f780000066000000000
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   0000787800002d5000000d400000753800000a4000003f7000000d4000000000
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   0001717000005b2000001b0000016a700000150000007f6000001b0000000000
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   0003636000013640000036000003556000002a0000017f400000360000000000
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   0007474000026d0000006c0000072b400000540000037f0000006c0000000000
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   000f0f0000055a0000015800000e57000001280000077e000001580000000000
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   001e1e00000b340000033000001d2e0000025000000f7c000003300000000000
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-                .junk   64
-dd1    $7e
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $18
-                .dd1    $18
-                .dd1    $00
-                .dd1    $00
-                .dd1    $60
-                .dd1    $70
-                .dd1    $38
-                .dd1    $1c
-                .dd1    $0e
-                .dd1    $06
-                .dd1    $00
-                .dd1    $00
-
-ChrBitmap       .bulk   1e333b3f37331e00
-
-Chr1            .bulk   0c0e0f0c0c0c3f00
-Chr2            .bulk   1e3330180c063f00
-Chr3            .bulk   1e
-                .dd1    $33
-                .dd1    $30
-                .dd1    $1c
-                .dd1    $30
-                .dd1    $33
-                .dd1    $1e
-                .dd1    $00
-                .dd1    $38
-                .dd1    $3c
-                .dd1    $36
-                .dd1    $33
-                .dd1    $3f
-                .dd1    $30
-                .dd1    $30
-                .dd1    $00
-                .dd1    $3f
-                .dd1    $03
-                .dd1    $03
-                .dd1    $1f
-                .dd1    $30
-                .dd1    $33
-                .dd1    $1e
-                .dd1    $00
-                .dd1    $1c
-                .dd1    $06
-                .dd1    $03
-                .dd1    $1f
-                .dd1    $33
-                .dd1    $33
-                .dd1    $1e
-                .dd1    $00
-                .dd1    $3f
-                .dd1    $33
-                .dd1    $18
-                .dd1    $0c
-                .dd1    $0c
-                .dd1    $0c
-                .dd1    $0c
-                .dd1    $00
-                .dd1    $1e
-                .dd1    $33
-                .dd1    $33
-                .dd1    $1e
-                .dd1    $33
-                .dd1    $33
-                .dd1    $1e
-                .dd1    $00
-                .dd1    $1e
-                .dd1    $33
-                .dd1    $33
-                .dd1    $3e
-                .dd1    $30
-                .dd1    $18
-                .dd1    $0c
-                .dd1    $00
-                .dd1    $00
-                .dd1    $18
-                .dd1    $18
-                .dd1    $00
-                .dd1    $18
-                .dd1    $18
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $18
-                .dd1    $18
-                .dd1    $00
-                .dd1    $18
-                .dd1    $18
-                .dd1    $10
-                .dd1    $08
-                .dd1    $10
-                .dd1    $18
-                .dd1    $1c
-                .dd1    $1e
-                .dd1    $1c
-                .dd1    $18
-                .dd1    $10
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $7e
-                .dd1    $00
-                .dd1    $7e
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $04
-                .dd1    $0c
-                .dd1    $1c
-                .dd1    $3c
-                .dd1    $1c
-                .dd1    $0c
-                .dd1    $04
-                .dd1    $00
-                .dd1    $3c
-                .dd1    $7e
-                .dd1    $62
-                .dd1    $30
-                .dd1    $18
-                .dd1    $00
-                .dd1    $18
-                .dd1    $00
-                .dd1    $90
-                .dd1    $88
-                .dd1    $b6
-                .dd1    $ff
-                .dd1    $ff
-                .dd1    $ff
-                .dd1    $be
-                .dd1    $b6
-                .dd1    $1e
-                .dd1    $33
-                .dd1    $33
-                .dd1    $3f
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $00
-                .dd1    $1f
-                .dd1    $33
-                .dd1    $33
-                .dd1    $1f
-                .dd1    $33
-                .dd1    $33
-                .dd1    $1f
-                .dd1    $00
-                .dd1    $1e
-                .dd1    $33
-                .dd1    $03
-                .dd1    $03
-                .dd1    $03
-                .dd1    $33
-                .dd1    $1e
-                .dd1    $00
-                .dd1    $0f
-                .dd1    $1b
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $1b
-                .dd1    $0f
-                .dd1    $00
-                .dd1    $1e
-                .dd1    $33
-                .dd1    $03
-                .dd1    $1f
-                .dd1    $03
-                .dd1    $33
-                .dd1    $1e
-                .dd1    $00
-                .dd1    $1e
-                .dd1    $33
-                .dd1    $03
-                .dd1    $1f
-                .dd1    $03
-                .dd1    $03
-                .dd1    $03
-                .dd1    $00
-                .dd1    $1e
-                .dd1    $33
-                .dd1    $03
-                .dd1    $3b
-                .dd1    $33
-                .dd1    $33
-                .dd1    $1e
-                .dd1    $00
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $3f
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $00
-                .dd1    $3f
-                .dd1    $0c
-                .dd1    $0c
-                .dd1    $0c
-                .dd1    $0c
-                .dd1    $0c
-                .dd1    $3f
-                .dd1    $00
-                .dd1    $30
-                .dd1    $30
-                .dd1    $30
-                .dd1    $30
-                .dd1    $33
-                .dd1    $33
-                .dd1    $1e
-                .dd1    $00
-                .dd1    $33
-                .dd1    $1b
-                .dd1    $0f
-                .dd1    $07
-                .dd1    $0f
-                .dd1    $1b
-                .dd1    $33
-                .dd1    $00
-                .dd1    $03
-                .dd1    $03
-                .dd1    $03
-                .dd1    $03
-                .dd1    $03
-                .dd1    $03
-                .dd1    $3f
-                .dd1    $00
-                .dd1    $33
-                .dd1    $3f
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $00
-                .dd1    $33
-                .dd1    $33
-                .dd1    $37
-                .dd1    $3b
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $00
-                .dd1    $1e
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $1e
-                .dd1    $00
-                .dd1    $1f
-                .dd1    $33
-                .dd1    $33
-                .dd1    $1f
-                .dd1    $03
-                .dd1    $03
-                .dd1    $03
-                .dd1    $00
-                .dd1    $1e
-                .dd1    $33
-                .dd1    $33
-                .dd1    $37
-                .dd1    $3b
-                .dd1    $33
-                .dd1    $1e
-                .dd1    $00
-                .dd1    $1f
-                .dd1    $33
-                .dd1    $33
-                .dd1    $1f
-                .dd1    $0f
-                .dd1    $1b
-                .dd1    $33
-                .dd1    $00
-                .dd1    $1e
-                .dd1    $33
-                .dd1    $03
-                .dd1    $1e
-                .dd1    $30
-                .dd1    $33
-                .dd1    $1e
-                .dd1    $00
-                .dd1    $3f
-                .dd1    $0c
-                .dd1    $0c
-                .dd1    $0c
-                .dd1    $0c
-                .dd1    $0c
-                .dd1    $0c
-                .dd1    $00
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $1e
-                .dd1    $00
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $1e
-                .dd1    $0c
-                .dd1    $00
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $3f
-                .dd1    $33
-                .dd1    $00
-                .dd1    $33
-                .dd1    $33
-                .dd1    $1e
-                .dd1    $0c
-                .dd1    $1e
-                .dd1    $33
-                .dd1    $33
-                .dd1    $00
-                .dd1    $33
-                .dd1    $33
-                .dd1    $33
-                .dd1    $1e
-                .dd1    $0c
-                .dd1    $0c
-                .dd1    $0c
-                .dd1    $00
-
-ChrZ            .bulk   3f30180c06033f00
-                .dd1    $1e
-                .dd1    $1e
-                .dd1    $06
-                .dd1    $06
-                .dd1    $1e
-                .dd1    $1e
-                .dd1    $00
-                .dd1    $00
-                .dd1    $06
-                .dd1    $0e
-                .dd1    $1c
-                .dd1    $38
-                .dd1    $70
-                .dd1    $60
-                .dd1    $00
-                .dd1    $00
-                .dd1    $78
-                .dd1    $78
-                .dd1    $60
-                .dd1    $60
-                .dd1    $78
-                .dd1    $78
-                .dd1    $00
-                .dd1    $00
-
-                .dd1    $08
-                .dd1    $1c
-                .dd1    $3e
-                .dd1    $7f
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $00
-                .dd1    $7f
-                .dd1    $00
-
-                .bulk   0e0e1b5c38735d671b47071f3e7f110409081109084849020852244210040508
-                 +      10090c484502004204020e04070760090a484702004e04120104090420090948
-                 +      49020042041e11244904210908484912285204120e3f474240735d67075f671f
-                 +      0e020000000240000000000000000042000000010000000000000000007f0000
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-                 +      00000000000000000000000f7f7f7f7c3f7f7800000000000007700038034000
-                 +      1c000000000000077f7f7f7f7f7f7e000000000000037001700020001f000000
-                 +      000000037f7f7f7f7f7f7f000000000000017807600038001f00000000000001
-                 +      7f7f7f7f7f7f7f00000000000000780f40003c001f
-                .bulk   000000000000007f7f7f7f7f7f7f000000000000003c0f00003c001f00000000
-                 +      0000003f7f7f7f7f7f7f000000000000001c0e00003c001f000000000000001f
-                 +      7f7f7f7f7f7f000000000000000e0000003c001f000000000000000f7f7f7f7f
-                 +      7f7f000000000000000600000038001f0000000000000007737f7f7f7f7f0000
-                 +      00000000000200000020001f0000000000000003607f7f7f7f7e000000000000
-                 +      000100000300001c0000000000000001400f7c3f7f78000000494e0000000000
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-                 +      0000000000000000000000
-
-LogoHardHat     .bulk   02552a552a552a552a552a552a552a552a552a552a552a552a500a552a552a55
-                 +      2a552a552a552a552a552a552a552a552a552a54aad5aad5aad5aad5aad5aad5
-                 +      aad5aad5aad5aad5aad5aad5aad5000000000000000000000000000000000000
-                 +      0000000000000000
-                .bulk   3c0e063038071c0700000360700e380e0000076e3c0e3807380e1e0e1e3c3807
-                 +      1c0700000360700e380e00000f6e1e0e3807380e0f0e3e3e1f4e1c0700000360
-                 +      3f5c380e00001f6e0f0e1f6e380e074e380e1f4e1c07000003603f1c380e0000
-                 +      3c0e074e1f4e380e036e00070e1c1c07000003601c38380e0000380e000e0e1c
-                 +      380e016e00070e1c1c07000003601c383b6e0000380e036e0e1c3b6e006e0007
-                 +      07181c67000003600e703b6e0000380e0f6e07383b6e002e000707081d730000
-                 +      03600e303b6e0000380e1f6e07183b6e030e000703401f79000003600700380e
-                 +      0000380e1c0e0340380e074e380e03401f7c000000000700380e00003c0e1c0e
-                 +      0340380e0f0e3e3e01601f1e00003f7e0340380e00001f6e1f6e0160380e1e0e
-                 +      1e3c01601e0f00003f7e0340380e00000f6e0f6e0160380e3c0e063000401c07
-                 +      00003f7e0100380e0000076e036e0040380e0000000000000000000000000000
-                 +      000000000000000000000000aad5aad5aad5aad5aad5aad5aad5aad5aad5aad5
-                 +      aad5aad5aad50a552a552a552a552a552a552a552a552a552a552a552a552a54
-                 +      02552a552a552a552a552a552a552a552a552a552a552a552a50
-others          .bulk   0e0e0e0e0e0e0e
-                .bulk   0f0f0f0f0f0f0f
-                .bulk   10101010101010
-                .bulk   11111111111111
-                .bulk   12121212121212
-                .bulk   13131313131313
-                .bulk   14141414
-
-                .bulk   00001668000005200000066000003a5c00003a5c000005200000052000001f78
-                 +      00000f7000000e700000066000000000
-
-                .bulk   00003c000000143c0000142800001668000005200000010000004a5200004a52
-                 +      00004b520000352c000006600000052000000a50000014280000224400000420
-
-                .bulk   0000003c00003c280000142800001668000005200000410200004a5200006a56
-                 +      00001b5800000520000006600000052000001250000014440000252800000a24
-
-macWalkRightSprite .bulk 00001c0700000c0700000e1f00000a5600000254000035280000352800001128
-                 +      00000050000002500000035000001f7c0000077c000003780000017000000000
-
-                .bulk   0000380e0000180e00001c3e0000152c0000052800006a5000006a5000002250
-                 +      00000120000005200000072000003f7800000f78000007700000036000000000
-
-                .bulk   0000701c0000301c0000387c00002a5800000a50000155200001552000004520
-                 +      0000024000000a4000000e4000007f7000001f7000000f600000074000000000
-
-                .bulk   000160380000603800007178000055300000152000032a4000032a4000010a40
-                 +      000005000000150000001d0000017f6000003f6000001f4000000f0000000000
-
-Macxxx          .bulk   0003407000014070
-                .bulk   0001637000012a60
-                .bulk   00002a4000065500
-                .bulk   0006550000021500
-                .bulk   00000a0000002a00
-                .bulk   00003a0000037f40
-                .bulk   00007f4000003f00
-                .bulk   00001e0000000000
-
-                .bulk   0007016000030160000347600002554000005500000d2a00000d2a0000042a00
-                 +      00001400000054000000740000077f0000017f0000007e0000003c0000000000
-
-                .bulk   000e03400006034000070f4000052b0000012a00001a5400001a540000085400
-                 +      000028000001280000016800000f7e0000037e0000017c000000780000000000
-                .junk   64
-
-macStandRightSprite .bulk 0000037000000070000001700000025000000250000001280000052800003528
-                 +      00003450000012500000035000001f7c0000077c000003780000017000000000
-                .bulk   00000760000001600000036000000520000005200000025000000a5000006a50
-                 +      00006920000025200000072000003f7800000f78000007700000036000000000
-                .bulk   00000f40000003400000074000000a4000000a40000005200000152000015520
-                 +      0001524000004a4000000e4000007f7000001f7000000f600000074000000000
-                .bulk   00001f000000070000000f00000015000000150000000a4000002a4000032a40
-                 +      000325000001150000001d0000017f6000003f6000001f4000000f0000000000
-                .bulk   00003e0000000e0000001e0000002a0000002a00000015000000550000065500
-                 +      00064a0000022a0000003a0000037f4000007f4000003f0000001e0000000000
-                .bulk   00007c0000001c0000003c00000054000000540000002a0000012a00000d2a00
-                 +      000d1400000454000000740000077f0000017f0000007e0000003c0000000000
-                .bulk   00017800000038000000780000012800000128000000540000025400001a5400
-                 +      001a28000009280000016800000f7e0000037e0000017c000000780000000000
-                .junk   64
-
-                .bulk   0000003c0000381c00007c1c00000a5400000a54000007680000056800000528
-                 +      00000050000002500000035000001f7c0000077c000003780000017000000000
-                .bulk   000000780000703800017838000015280000152800000f5000000b5000000a50
-                 +      00000120000005200000072000003f7800000f78000007700000036000000000
-                .bulk   00000170000160700003707000002a5000002a5000001f200000172000001520
-                 +      0000024000000a4000000e4000007f7000001f7000000f600000074000000000
-                .bulk   000003600003416000076160000055200000552000003e4000002e4000002a40
-                 +      000005000000150000001d0000017f6000003f6000001f4000000f0000000000
-                .bulk   0000074000070340000f434000012a4000012a4000007d0000005d0000005500
-                 +      00000a0000002a0000003a0000037f4000007f4000003f0000001e0000000000
-                .bulk   00000f00000e0700001f0700000255000002550000017a0000013a0000012a00
-                 +      00001400000054000000740000077f0000017f0000007e0000003c0000000000
-                .bulk   00001e00001c0e00003e0e0000052a0000052a00000374000002740000025400
-                 +      000028000001280000016800000f7e0000037e0000017c000000780000000000
-                .junk   64
-
-macWalkLeftSprite .bulk 0000380e0000380c00003e1c00001a5400000a500000052b0000052b00000522
-                 +      00000240000002500000027000000f7e00000f78000007700000036000000000
-                .bulk   0000701c0000701800007c38000035280000152000000a5600000a5600000a44
-                 +      00000500000005200000056000001f7c00001f7000000f600000074000000000
-                .bulk   00016038000160300001787000006a5000002a400000152c0000152c00001508
-                 +      00000a0000000a4000000b4000003f7800003f6000001f4000000f0000000000
-                .bulk   000340700003406000037160000155200000550000002a5800002a5800002a10
-                 +      00001400000015000000170000007f7000007f4000003f0000001e0000000000
-                .bulk   00070160000701400007634000032a4000012a00000055300000553000005420
-                 +      0000280000002a0000002e0000017f6000017f0000007e0000003c0000000000
-                .bulk   000e0340000e0300000f4700000655000002540000012a6000012a6000012840
-                 +      000050000000540000005c0000037f4000037e0000017c000000780000000000
-
-                .bulk   001c0700001c0600001f0e00000d2a0000052800000255400002554000025100
-                 +      00012000000128000001380000077f0000077c00000378000001700000000000
-                .junk   64
-
-mackStandLeftSprite .bulk 000003700000034000000360000002500000025000000520000005280000052b
-                 +      0000024b000002520000027000000f7e00000f78000007700000036000000000
-                .bulk   000007600000070000000740000005200000052000000a4000000a5000000a56
-                 +      00000516000005240000056000001f7c00001f7000000f600000074000000000
-                .bulk   00000f4000000e0000000f0000000a4000000a4000001500000015200000152c
-                 +      00000a2c00000a4800000b4000003f7800003f6000001f4000000f0000000000
-                .bulk   00001f0000001c0000001e00000015000000150000002a0000002a4000002a58
-                 +      00001458000015100000170000007f7000007f4000003f0000001e0000000000
-                .bulk   00003e000000380000003c0000002a0000002a00000054000000550000005530
-                 +      0000293000002a2000002e0000017f6000017f0000007e0000003c0000000000
-                .bulk   00007c00000070000000780000005400000054000001280000012a0000012a60
-                 +      000052600000544000005c0000037f4000037e0000017c000000780000000000
-
-                .bulk   0001780000016000000170000001280000012800000250000002540000025540
-                 +      00012540000129000001380000077f0000077c00000378000001700000000000
-                .junk   64
-
-mac2WalkLeftSprite .bulk 00000f0000000e0700000e0f00000a5400000a54000005780000056800000528
-                 +      00000240000002500000027000000f7e00000f78000007700000036000000000
-                .bulk   00001e0000001c0e00001c1e000015280000152800000b7000000b5000000a50
-                 +      00000500000005200000056000001f7c00001f7000000f600000074000000000
-                .bulk   00003c000000381c0000383c00002a5000002a50000017600000172000001520
-                 +      00000a0000000a4000000b4000003f7800003f6000001f4000000f0000000000
-                .bulk   000078000000703800007078000055200000552000002f4000002e4000002a40
-                 +      00001400000015000000170000007f7000007f4000003f0000001e0000000000
-                .bulk   00017000000160700001617000012a4000012a4000005f0000005d0000005500
-                 +      0000280000002a0000002e0000017f6000017f0000007e0000003c0000000000
-                .bulk   000360000003416000034360000255000002550000013e0000013a0000012a00
-                 +      000050000000540000005c0000037f4000037e0000017c000000780000000000
-
-                .bulk   00074000000703400007074000052a0000052a0000027c000002740000025400
-                 +      00012000000128000001380000077f0000077c00000378000001700000000000
-                .junk   64
-
-macJumpRightSprite .bulk 0000000000001c0f00001e1f00000a5400000254000035280000352800001128
-                 +      00000050000002500000035000001f7c0000077c000003780000017000000000
-                .bulk   000000000000381e00003c3e000015280000052800006a5000006a5000002250
-                 +      00000120000005200000072000003f7800000f78000007700000036000000000
-                .bulk   000000000000703c0000787c00002a5000000a50000155200001552000004520
-                 +      0000024000000a4000000e4000007f7000001f7000000f600000074000000000
-                .bulk   000000000001607800017178000055200000152000032a4000032a4000010a40
-                 +      000005000000150000001d0000017f6000003f6000001f4000000f0000000000
-                .bulk   00000000000341700003637000012a4000002a40000655000006550000021500
-                 +      00000a0000002a0000003a0000037f4000007f4000003f0000001e0000000000
-                .bulk   0000000000070360000747600002550000005500000d2a00000d2a0000042a00
-                 +      00001400000054000000740000077f0000017f0000007e0000003c0000000000
-
-                .bulk   00000000000e0740000f0f4000052a0000012a00001a5400001a540000085400
-                 +      000028000001280000016800000f7e0000037e0000017c000000780000000000
-                .bulk   2020cd0152415749
-                .bulk   4e5055540d058501
-                .bulk   3c310d0cc402234e
-                .bulk   594441544145310d
-                .bulk   0a86014241444441
-                .bulk   54410d03a0000d13
-                .bulk   5e31202020202020
-                .bulk   cd01524157494e50
-
-macJumpLeftSprite .bulk 0000000000003c0e00003e1e00000a5400000a500000052b0000052b00000522
-                 +      00000240000002500000027000000f7e00000f78000007700000036000000000
-
-                .bulk   000000000000781c00007c3c000015280000152000000a5600000a5600000a44
-                 +      00000500000005200000056000001f7c00001f7000000f600000074000000000
-                .bulk   00000000000170380001787800002a5000002a400000152c0000152c00001508
-                 +      00000a0000000a4000000b4000003f7800003f6000001f4000000f0000000000
-                .bulk   000000000003607000037170000055200000550000002a5800002a5800002a10
-                 +      00001400000015000000170000007f7000007f4000003f0000001e0000000000
-                .bulk   00000000000741600007636000012a4000012a00000055300000553000005420
-                 +      0000280000002a0000002e0000017f6000017f0000007e0000003c0000000000
-                .bulk   00000000000f0340000f4740000255000002540000012a6000012a6000012840
-                 +      000050000000540000005c0000037f4000037e0000017c000000780000000000
-                .bulk   00000000001e0700001f0f0000052a0000052800000255400002554000025100
-                 +      00012000000128000001380000077f0000077c00000378000001700000000000
-                .junk   64
-
-mackFrontSprite .bulk   00003c3c00001c380000166800001528000005200000066000001a5800003a5c
-                 +      00003a5c000005200000052000001f7800000f7000000e700000066000000000
-                .bulk   000078780000387000002d5000002a5000000a4000000d400000353000007538
-                 +      0000753800000a4000000a4000003f7000001f6000001d6000000d4000000000
-                .bulk   000171700000716000005b20000055200000150000001b0000006a6000016a70
-                 +      00016a70000015000000150000007f6000003f4000003b4000001b0000000000
-
-                .bulk   00036360000163400001364000012a4000002a00000036000001554000035560
-                 +      0003556000002a0000002a0000017f4000007f00000077000000360000000000
-                .bulk   000747400003470000026d00000255000000540000006c0000032b0000072b40
-                 +      00072b40000054000000540000037f0000017e0000016e0000006c0000000000
-                .bulk   000f0f0000070e0000055a0000052a00000128000001580000065600000e5700
-                 +      000e5700000128000001280000077e0000037c0000035c000001580000000000
-                .bulk   001e1e00000e1c00000b3400000a54000002500000033000000d2c00001d2e00
-                 +      001d2e000002500000025000000f7c0000077800000738000003300000000000
-                .junk   64
-
-mackFront2Sprite .bulk  000000000000000000003c3c00001c3800001668000005200000066000003a5c
-                 +      00003a5c000005200000052000001f7800000f7000000e700000066000000000
-
-                .bulk   0000000000000000000078780000387000002d5000000a4000000d4000007538
-                 +      0000753800000a4000000a4000003f7000001f6000001d6000000d4000000000
-
-                .bulk   0000000000000000000171700000716000005b200000150000001b0000016a70
-                 +      00016a70000015000000150000007f6000003f4000003b4000001b0000000000
-
-                .bulk   000000000000000000036360000163400001364000002a000000360000035560
-                 +      0003556000002a0000002a0000017f4000007f00000077000000360000000000
-
-                .bulk   0000000000000000000747400003470000026d000000540000006c0000072b40
-                 +      00072b40000054000000540000037f0000017e0000016e0000006c0000000000
-
-                .bulk   0000000000000000000f0f0000070e0000055a000001280000015800000e5700
-                 +      000e5700000128000001280000077e0000037c0000035c000001580000000000
-
-                .bulk   0000000000000000001e1e00000e1c00000b34000002500000033000001d2e00
-                 +      001d2e000002500000025000000f7c0000077800000738000003300000000000
-                .junk   64
-
-                .bulk   00003c000000143c0000142800001668000005200000010000004a5200004a52
-                 +      00004b520000352c000006600000052000000a50000014280000224400000420
-
-                .bulk   00007800000028780000285000002d5000000a40000002000001152400011524
-                 +      0001172400006a5800000d4000000a4000001520000028500000450800000840
-                .bulk   00017000000051700000512000005b20000015000000040000022a4800022a48
-                 +      00022e480001553000001b000000150000002a400000512000010a1000001100
-                .bulk   0003600000012360000122400001364000002a00000008000004551000045510
-                 +      00045d1000032a600000360000002a0000005500000122400002142000002200
-                .bulk   00074000000247400002450000026d00000054000000100000092a2000092a20
-                 +      00093a200006554000006c000000540000012a00000245000004284000004400
-                .bulk   000f000000050f0000050a0000055a0000012800000020000012544000125440
-                 +      00127440000d2b0000015800000128000002540000050a000008510000010800
-                .bulk   001e0000000a1e00000a1400000b340000025000000040000025290000252900
-                 +      00256900001a5600000330000002500000052800000a14000011220000021000
-                .junk   64
-
-                .bulk   0000003c00003c280000142800001668000005200000410200004a5200006a56
-                 +      00001b5800000520000006600000052000001250000014440000252800000a24
-                .bulk   00000078000078500000285000002d5000000a4000010204000115240001552c
-                 +      0000373000000a4000000d4000000a40000025200000290800004a5000001448
-                .bulk   00000170000171200000512000005b20000015000002040800022a4800032a58
-                 +      00006e600000150000001b000000150000004a40000052100001152000002910
-                .bulk   0000036000036240000122400001364000002a00000408100004551000065530
-                 +      00015d4000002a000000360000002a00000115000001242000022a4000005220
-                .bulk   00000740000745000002450000026d00000054000008102000092a20000d2a60
-                 +      00033b000000540000006c000000540000022a00000248400004550000012440
-                .bulk   00000f00000f0a0000050a0000055a00000128000010204000125440001a5540
-                 +      00067600000128000001580000012800000454000005110000092a0000024900
-                .bulk   00001e00001e1400000a1400000b340000025000002041000025290000352b00
-                 +      000d6c0000025000000330000002500000092800000a22000012540000051200
-                .junk   64
-
-                .bulk   00000f000000073c000005380000052800000528000005280000065800000658
-                 +      00000e5c00003f3f000031630000021000000778000006580000077800000250
-                .bulk   00001e0000000e7800000a7000000a5000000a5000000a5000000d3000000d30
-                 +      00001d3800007e7e000063460000042000000f7000000d3000000f7000000520
-                .bulk   00003c0000001d700000156000001520000015200000152000001a6000001a60
-                 +      00003a7000017d7c0001470c0000084000001f6000001a6000001f6000000a40
-                .bulk   0000780000003b6000002b4000002a4000002a4000002a400000354000003540
-                 +      0000756000037b7800030e180000110000003f400000354000003f4000001500
-                .bulk   00017000000077400000570000005500000055000000550000006b0000006b00
-                 +      00016b400007777000061c300000220000007f0000006b0000007f0000002a00
-                .bulk   0003600000016f0000012e0000012a0000012a0000012a000001560000015600
-                 +      00035700000f6f60000c38600000440000017e000001560000017e0000005400
-                .bulk   0007400000035e0000025c0000025400000254000002540000032c0000032c00
-                 +      00072e00001f5f40001871400001080000037c0000032c0000037c0000012800
-                .junk   64
-
-                .bulk   0000003c00000f38000007280000052800000528000005280000065800000658
-                 +      00000e5c00001f3e00001162000032130000377b000006580000077800000250
-                .bulk   0000007800001e7000000e5000000a5000000a5000000a5000000d3000000d30
-                 +      00001d3800003e7c000023440000642600006f7600000d3000000f7000000520
-                .bulk   0000017000003d6000001d2000001520000015200000152000001a6000001a60
-                 +      00003a7000007d78000047080001484c00015f6c00001a6000001f6000000a40
-                .bulk   0000036000007b4000003a4000002a4000002a4000002a400000354000003540
-                 +      0000756000017b7000010e100003111800033f580000354000003f4000001500
-                .bulk   00000740000177000000750000005500000055000000550000006b0000006b00
-                 +      00016b400003776000021c200006223000067f3000006b0000007f0000002a00
-                .bulk   00000f0000036e0000016a0000012a0000012a0000012a000001560000015600
-                 +      0003570000076f4000043840000c4460000d7e600001560000017e0000005400
-                .bulk   00001e0000075c000003540000025400000254000002540000032c0000032c00
-                 +      00072e00000f5f000008710000190940001b7d4000032c0000037c0000012800
-                .junk   64
-
-                .bulk   0000014000000140000001400000014000000360000002500000025000000370
-                 +      0000025000000370000002500000025000003f7e00007f7f0000016000000000
-
-                .bulk   0000030000000300000003000000030000000740000005200000052000000760
-                 +      0000052000000760000005200000052000007f7c00017f7e0000034000000000
-
-                .bulk   0000060000000600000006000000060000000f0000000a4000000a4000000f40
-                 +      00000a4000000f4000000a4000000a4000017f7800037f7c0000070000000000
-
-                .bulk   00000c0000000c0000000c0000000c0000001e00000015000000150000001f00
-                 +      0000150000001f00000015000000150000037f7000077f7800000e0000000000
-
-                .bulk   0000180000001800000018000000180000003c0000002a0000002a0000003e00
-                 +      00002a0000003e0000002a0000002a0000077f60000f7f7000001c0000000000
-
-                .bulk   0000300000003000000030000000300000007800000054000000540000007c00
-                 +      0000540000007c000000540000005400000f7f40001f7f600000380000000000
-
-                .bulk   0000600000006000000060000000600000017000000128000001280000017800
-                 +      00012800000178000001280000012800001f7f00003f7f400000700000000000
-                .junk   64
-
-                .bulk   0000014000000360000002500000025000000370000002500000037000000250
-                 +      0000025000003f7e00007f7f0000016000000000000000000000000000000000
-
-                .bulk   0000030000000740000005200000052000000760000005200000076000000520
-                 +      0000052000007f7c00017f7e0000034000000000000000000000000000000000
-
-                .bulk   0000060000000f0000000a4000000a4000000f4000000a4000000f4000000a40
-                 +      00000a4000017f7800037f7c0000070000000000000000000000000000000000
-
-                .bulk   00000c0000001e00000015000000150000001f000000150000001f0000001500
-                 +      0000150000037f7000077f7800000e0000000000000000000000000000000000
-
-                .bulk   0000180000003c0000002a0000002a0000003e0000002a0000003e0000002a00
-                 +      00002a0000077f60000f7f7000001c0000000000000000000000000000000000
-
-                .bulk   0000300000007800000054000000540000007c000000540000007c0000005400
-                 +      00005400000f7f40001f7f600000380000000000000000000000000000000000
-
-                .bulk   0000600000017000000128000001280000017800000128000001780000012800
-                 +      00012800001f7f00003f7f400000700000000000000000000000000000000000
-                .junk   64
-
-s3boxBitmap     .bulk   00000f7f00003e5700007657000056570000577f00005d2b0000752c00007f70
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   00001f7e00007d2e00016d2e00012d2e00012f7e00013a5600016a5800017f60
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   00003f7c00017a5c00035a5c00025a5c00025f7c0002752c0003553000037f40
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   00007f7800037538000735380005353800053f7800056a5800072a6000077f00
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   00017f7000076a70000e6a70000a6a70000a7f70000b5530000e5540000f7e00
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   00037f60000f5560001d55600015556000157f6000172a60001d2b00001f7c00
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   00077f40001f2b40003b2b40002b2b40002b7f40002e5540003a5600003f7800
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-                .junk   64
-
-                .bulk   0000ffff0000ffff0000d5aa0000d5aa0000d5aa0000d5aa0000ffff0000ffff
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   0081fffe0081fffe0081aad40081aad40081aad40081aad40081fffe0081fffe
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   0083fffc0083fffc0082d5a80082d5a80082d5a80082d5a80083fffc0083fffc
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   0087fff80087fff80085aad00085aad00085aad00085aad00087fff80087fff8
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   008ffff0008ffff0008ad5a0008ad5a0008ad5a0008ad5a0008ffff0008ffff0
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   009fffe0009fffe00095aac00095aac00095aac00095aac0009fffe0009fffe0
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   00bfffc000bfffc000aad50000aad50000aad50000aad50000bfffc000bfffc0
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-                .junk   64
-
-                .bulk   000000040000001c0000033e00002f5400003a3e00002b6a00000d1e00000674
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   00000008000000380000067c00005f280000747c0000575400001a3c00000d68
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   000000100000007000000d7800013e500001697800012f280000347800001b50
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   000000200000016000001b7000027d200003537000025e500000697000003720
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   00000040000003400000376000057a400007276000053d200001536000006e40
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   000001000000070000006f40000b7500000e4f40000a7a400003274000015d00
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-
-                .bulk   0000020000000e0000015f0000176a00001d1f000015750000064f0000033a00
-                 +      0000000000000000000000000000000000000000000000000000000000000000
-                .junk   64
-
-s2MagnetShape   .bulk   00002a5400007f7e00002a5400003f7c00001f78000002400000024000000240
-                 +      0000024000000240000002400000024000000240000002400000024000000240
-
-                .bulk   0000552800017f7c0000552800007f7800003f70000005000000050000000500
-                 +      0000050000000500000005000000050000000500000005000000050000000500
-
-                .bulk   00012a5000037f7800012a5000017f7000007f6000000a0000000a0000000a00
-                 +      00000a0000000a0000000a0000000a0000000a0000000a0000000a0000000a00
-
-                .bulk   0002552000077f700002552000037f6000017f40000014000000140000001400
-                 +      0000140000001400000014000000140000001400000014000000140000001400
-
-                .bulk   00052a40000f7f6000052a4000077f4000037f00000028000000280000002800
-                 +      0000280000002800000028000000280000002800000028000000280000002800
-
-                .bulk   000a5500001f7f40000a5500000f7f0000077e00000050000000500000005000
-                 +      0000500000005000000050000000500000005000000050000000500000005000
-
-                .bulk   00152a00003f7f0000152a00001f7e00000f7c00000120000001200000012000
-                 +      0001200000012000000120000001200000012000000120000001200000012000
-                .junk   64
-
-                .bulk   0000003c00003c3c00001668000015280000066000000a5000007a5e00000520
-                 +      00001f7800000f70000006600000000000000000000000000000000000000000
-
-                .bulk   000000780000787800002d5000002a5000000d40000015200001753c00000a40
-                 +      00003f7000001f6000000d400000000000000000000000000000000000000000
-
-                .bulk   000001700001717000005b200000552000001b0000002a4000036a7800001500
-                 +      00007f6000003f4000001b000000000000000000000000000000000000000000
-
-                .bulk   00000360000363600001364000012a4000003600000055000007557000002a00
-                 +      00017f4000007f00000036000000000000000000000000000000000000000000
-
-                .bulk   000007400007474000026d000002550000006c0000012a00000f2b6000005400
-                 +      00037f0000017e0000006c000000000000000000000000000000000000000000
-
-                .bulk   00000f00000f0f0000055a0000052a000001580000025400001e574000012800
-                 +      00077e0000037c00000158000000000000000000000000000000000000000000
-
-                .bulk   00001e00001e1e00000b3400000a54000003300000052800003d2f0000025000
-                 +      000f7c0000077800000330000000000000000000000000000000000000000000
-                .junk   64
-
-                .bulk   00003c3c000016680000066000003a5c0000052000001f780000066000000000
+flattenMack2Preshift .bulk 00003c3c000016680000066000003a5c0000052000001f780000066000000000
                  +      0000000000000000000000000000000000000000000000000000000000000000
 
                 .bulk   0000787800002d5000000d400000753800000a4000003f7000000d4000000000
